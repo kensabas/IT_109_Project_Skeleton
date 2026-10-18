@@ -17,6 +17,12 @@ export default defineNuxtConfig({
 
   app: {
     head: {
+      // Phase 6.3 — set the document language so screen readers pronounce
+      // the UI as English. "en" is the broad default; unconfirmed if the
+      // team wants Filipino/Tagalog ("tl") or regional variants later.
+      htmlAttrs: {
+        lang: 'en',
+      },
       title: 'CleanLinis',
       link: [
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
