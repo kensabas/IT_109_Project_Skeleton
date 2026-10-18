@@ -14,15 +14,32 @@
 // (outside the Nuxt runtime where defineStore would be auto-imported).
 
 import { defineStore } from 'pinia'
-import type { MockUser } from '../data/mockUsers'
+import { initialMockUsers, type MockUser } from '../data/mockUsers'
 
 interface State {
   currentUser: MockUser | null
+  // Mock users list, kept in memory only. Lost on refresh — this is
+  // the midterm's required behavior per PLAN_F-01.md Phase 4.4.
+  users: MockUser[]
 }
+
+// Email comparison is case-insensitive on login (also on duplicate-email
+// check in 4.4.1). Unconfirmed choice per the Phase 4 prompt; reported
+// in the Phase 4 run-status.
+function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase()
+}
+
+// Single error message for both "unknown email" and "wrong password".
+// The plan allows this ("one message for both cases is fine").
+const INVALID_CREDENTIALS_MESSAGE = 'Email or password is incorrect.'
+
+export type AuthResult = { ok: true } | { ok: false; error: string }
 
 export const useCurrentUserStore = defineStore('currentUser', {
   state: (): State => ({
     currentUser: null,
+    users: initialMockUsers(),
   }),
 
   getters: {
@@ -32,6 +49,18 @@ export const useCurrentUserStore = defineStore('currentUser', {
   actions: {
     logOut() {
       this.currentUser = null
+    },
+
+    logIn(email: string, password: string): AuthResult {
+      const needle = normalizeEmail(email)
+      const match = this.users.find(
+        (u) => normalizeEmail(u.email) === needle && u.password === password,
+      )
+      if (!match) {
+        return { ok: false, error: INVALID_CREDENTIALS_MESSAGE }
+      }
+      this.currentUser = match
+      return { ok: true }
     },
   },
 })

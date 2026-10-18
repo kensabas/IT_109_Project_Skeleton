@@ -1,19 +1,34 @@
 <!--
-  /login — F-01 Phase 3.1
-  Fields and content from the plan's approved-screens table (row 1):
-  email, password, "Log in" button, link to create an account, note that
-  admin accounts are created by the main admin in the admin panel.
+  /login — F-01 Phase 3.1 (3.5.2 added links) + 4.3 (login logic).
+  Fields and content from the plan's approved-screens table (row 1).
 
-  Phase 3 scope only: no validation (Phase 5), no auth logic (Phase 4).
-  Submit is intercepted with @submit.prevent so pressing the button
-  does nothing but keep the typed values. The create-account link is
-  added in 3.5.2.
+  Phase 4 scope: real login against the mock user list via the
+  currentUser Pinia store. Still no validation (Phase 5): fields hold
+  what is typed, submit is intercepted, the store returns a single
+  "Email or password is incorrect." message for a bad email or a wrong
+  password.
+
+  Navigation to /welcome on success lands in Phase 4.5.
 -->
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useCurrentUserStore } from '~/stores/currentUser'
 
 const email = ref('')
 const password = ref('')
+const formError = ref('')
+
+const currentUser = useCurrentUserStore()
+
+function onSubmit() {
+  const result = currentUser.logIn(email.value, password.value)
+  if (!result.ok) {
+    formError.value = result.error
+    return
+  }
+  formError.value = ''
+  // Phase 4.5 adds the navigation to /welcome.
+}
 </script>
 
 <template>
@@ -21,7 +36,7 @@ const password = ref('')
     heading="Welcome back"
     sub-text="Log in to your CleanLinis account."
   >
-    <form class="login-form" novalidate @submit.prevent>
+    <form class="login-form" novalidate @submit.prevent="onSubmit">
       <TextField
         id="login-email"
         v-model="email"
@@ -39,6 +54,13 @@ const password = ref('')
         autocomplete="current-password"
         required
       />
+
+      <!-- Shared "incorrect credentials" message. Uses the same error
+           color as field-level errors so it fits the error styling. -->
+      <p v-if="formError" class="login-form__error" role="alert">
+        {{ formError }}
+      </p>
+
       <BaseButton type="submit">Log in</BaseButton>
 
       <p class="login-form__alt">
@@ -58,6 +80,13 @@ const password = ref('')
   display: flex;
   flex-direction: column;
   gap: 18px;
+}
+
+.login-form__error {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-error);
+  text-align: center;
 }
 
 .login-form__alt {

@@ -37,3 +37,48 @@ describe('currentUser store — 4.2 identity + logOut', () => {
     expect(store.isLoggedIn).toBe(false)
   })
 })
+
+describe('currentUser store — 4.3 logIn against mock users', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+
+  it('logs in a sample client with the right email and password', () => {
+    const store = useCurrentUserStore()
+    const result = store.logIn('maria.santos@example.com', 'StrongPass123')
+    expect(result).toEqual({ ok: true })
+    expect(store.currentUser?.email).toBe('maria.santos@example.com')
+    expect(store.currentUser?.role).toBe('client')
+  })
+
+  it('logs in a sample cleaner with the right email and password', () => {
+    const store = useCurrentUserStore()
+    const result = store.logIn('rosa.garcia@example.com', 'CleanBest2024')
+    expect(result).toEqual({ ok: true })
+    expect(store.currentUser?.email).toBe('rosa.garcia@example.com')
+    expect(store.currentUser?.role).toBe('cleaner')
+  })
+
+  it('rejects a wrong password with the shared error message', () => {
+    const store = useCurrentUserStore()
+    const result = store.logIn('maria.santos@example.com', 'wrong-password')
+    expect(result.ok).toBe(false)
+    expect(result.error).toMatch(/incorrect/i)
+    expect(store.currentUser).toBeNull()
+  })
+
+  it('rejects an unknown email with the shared error message', () => {
+    const store = useCurrentUserStore()
+    const result = store.logIn('nobody@example.com', 'StrongPass123')
+    expect(result.ok).toBe(false)
+    expect(result.error).toMatch(/incorrect/i)
+    expect(store.currentUser).toBeNull()
+  })
+
+  it('matches emails case-insensitively on login', () => {
+    const store = useCurrentUserStore()
+    const result = store.logIn('MARIA.SANTOS@example.com', 'StrongPass123')
+    expect(result).toEqual({ ok: true })
+    expect(store.currentUser?.email).toBe('maria.santos@example.com')
+  })
+})
