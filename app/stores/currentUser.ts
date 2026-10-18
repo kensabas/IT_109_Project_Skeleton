@@ -62,5 +62,13 @@ export const useCurrentUserStore = defineStore('currentUser', {
       this.currentUser = match
       return { ok: true }
     },
+
+    // Appends the new user to the in-memory list and signs them in.
+    // Duplicate-email checking is added in 4.4.1.
+    signUp(newUser: MockUser): AuthResult {
+      this.users.push(newUser)
+      this.currentUser = newUser
+      return { ok: true }
+    },
   },
 })

@@ -82,3 +82,57 @@ describe('currentUser store — 4.3 logIn against mock users', () => {
     expect(store.currentUser?.email).toBe('maria.santos@example.com')
   })
 })
+
+describe('currentUser store — 4.4 signUp adds to the mock list', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+
+  it('signs up a new client and logs them in', () => {
+    const store = useCurrentUserStore()
+    const sizeBefore = store.users.length
+    const result = store.signUp({
+      name: 'Luis Aquino',
+      email: 'luis.aquino@example.com',
+      mobileNumber: '09170001234',
+      password: 'NewPassword9',
+      role: 'client',
+      clientType: 'homeowner',
+    })
+    expect(result).toEqual({ ok: true })
+    expect(store.users.length).toBe(sizeBefore + 1)
+    expect(store.currentUser?.email).toBe('luis.aquino@example.com')
+    expect(store.currentUser?.role).toBe('client')
+  })
+
+  it('signs up a new cleaner and logs them in', () => {
+    const store = useCurrentUserStore()
+    const result = store.signUp({
+      name: 'Carlos Bautista',
+      email: 'carlos.bautista@example.com',
+      mobileNumber: '09170005678',
+      password: 'CleanWell8',
+      role: 'cleaner',
+    })
+    expect(result).toEqual({ ok: true })
+    expect(store.currentUser?.email).toBe('carlos.bautista@example.com')
+    expect(store.currentUser?.role).toBe('cleaner')
+  })
+
+  it('allows a signed-up user to log out and log back in with the same password', () => {
+    const store = useCurrentUserStore()
+    store.signUp({
+      name: 'Luis Aquino',
+      email: 'luis.aquino@example.com',
+      mobileNumber: '09170001234',
+      password: 'NewPassword9',
+      role: 'client',
+      clientType: 'homeowner',
+    })
+    store.logOut()
+    expect(store.currentUser).toBeNull()
+    const result = store.logIn('luis.aquino@example.com', 'NewPassword9')
+    expect(result).toEqual({ ok: true })
+    expect(store.currentUser?.email).toBe('luis.aquino@example.com')
+  })
+})

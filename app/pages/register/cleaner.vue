@@ -1,23 +1,41 @@
 <!--
-  /register/cleaner — F-01 Phase 3.4
-  Fields and content from the plan's approved-screens table (row 4):
-  full name, email, mobile number, password, confirm password, and a
-  notice box with the 6 required documents and the approval message.
-  The six documents are from the current-run prompt:
-  birth certificate, NBI clearance, police clearance, valid
-  government-issued ID, BIR, medical certificate / fit-to-work.
+  /register/cleaner — F-01 Phase 3.4 + 4.4 (sign-up logic).
+  Fields from the plan's approved-screens table (row 4).
 
-  Phase 3 scope only: no validation (Phase 5), no sign-up logic
-  (Phase 4). Submit is intercepted; back/log-in links are added in 3.5.2.
+  Phase 4 scope: adds the sign-up to the in-memory mock list via the
+  currentUser Pinia store. No validation (Phase 5) — a sign-up with
+  blank fields will be accepted; that's a known gap, listed in the
+  Phase 4 run-status. Duplicate email is handled in 4.4.1.
+  Navigation to /welcome lands in 4.5.
 -->
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useCurrentUserStore } from '~/stores/currentUser'
 
 const fullName = ref('')
 const email = ref('')
 const mobileNumber = ref('')
 const password = ref('')
 const confirmPassword = ref('')
+const emailError = ref('')
+
+const currentUser = useCurrentUserStore()
+
+function onSubmit() {
+  const result = currentUser.signUp({
+    name: fullName.value,
+    email: email.value,
+    mobileNumber: mobileNumber.value,
+    password: password.value,
+    role: 'cleaner',
+  })
+  if (!result.ok) {
+    emailError.value = result.error
+    return
+  }
+  emailError.value = ''
+  // Phase 4.5 adds the navigation to /welcome.
+}
 </script>
 
 <template>
@@ -25,7 +43,7 @@ const confirmPassword = ref('')
     heading="Apply as a cleaner"
     sub-text="Create your cleaner profile."
   >
-    <form class="signup-form" novalidate @submit.prevent>
+    <form class="signup-form" novalidate @submit.prevent="onSubmit">
       <TextField
         id="cleaner-full-name"
         v-model="fullName"
@@ -41,6 +59,7 @@ const confirmPassword = ref('')
         type="email"
         placeholder="you@example.com"
         autocomplete="email"
+        :error="emailError"
         required
       />
       <TextField
