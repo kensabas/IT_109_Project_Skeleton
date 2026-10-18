@@ -3,6 +3,8 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 
+  modules: ['@pinia/nuxt'],
+
   css: ['~/assets/css/main.css'],
 
   // Phase 3.5.1 — the four auth routes are set by file-based routing in
