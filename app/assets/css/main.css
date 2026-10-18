@@ -23,6 +23,12 @@
   /* Accent */
   --color-accent: #F2B33D;       /* accent yellow */
 
+  /* Error — PLACEHOLDER, unconfirmed: the mockup has no error color.
+   * Chosen so form-error text has at least 4.5:1 contrast on white.
+   * #B91C1C on #FFFFFF = ~6.47:1 (WCAG 2.0 relative-luminance formula).
+   */
+  --color-error: #B91C1C;        /* placeholder, unconfirmed */
+
   /* Shape */
   --radius-card: 16px;
   --radius-control: 12px;        /* inputs and buttons: 10–12px range, 12px chosen */
