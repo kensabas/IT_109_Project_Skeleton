@@ -274,3 +274,97 @@ describe('5.4 confirm password — validateCleanerSignUp', () => {
     expect(errors.confirmPassword).toBe(ERRORS.confirmMismatch)
   })
 })
+
+// ---------- 5.5 Fence: pages must not call the store on failed validation ----------
+// These simulate the page's submit flow:
+//   const errors = validate(...)
+//   if (hasErrors(errors)) return      // do NOT call the store
+//   store.logIn / store.signUp(...)
+
+import { setActivePinia, createPinia } from 'pinia'
+import { useCurrentUserStore } from '../app/stores/currentUser'
+import { hasErrors } from '../app/utils/validation'
+
+describe('5.5 fence — a blank client sign-up does not add a user to the store', () => {
+  it('validator flags errors AND the store list stays the same size', () => {
+    setActivePinia(createPinia())
+    const store = useCurrentUserStore()
+    const sizeBefore = store.users.length
+
+    const input = {
+      clientType: '',
+      fullName: '',
+      email: '',
+      mobileNumber: '',
+      password: '',
+      confirmPassword: '',
+    }
+    const errors = validateClientSignUp(input)
+    expect(hasErrors(errors)).toBe(true)
+    // Simulate the page's fence:
+    if (!hasErrors(errors)) {
+      store.signUp({
+        name: input.fullName,
+        email: input.email,
+        mobileNumber: input.mobileNumber,
+        password: input.password,
+        role: 'client',
+      })
+    }
+    expect(store.users.length).toBe(sizeBefore)
+    expect(store.currentUser).toBeNull()
+  })
+})
+
+describe('5.5 fence — a blank cleaner sign-up does not add a user to the store', () => {
+  it('validator flags errors AND the store list stays the same size', () => {
+    setActivePinia(createPinia())
+    const store = useCurrentUserStore()
+    const sizeBefore = store.users.length
+
+    const input = {
+      fullName: '',
+      email: '',
+      mobileNumber: '',
+      password: '',
+      confirmPassword: '',
+    }
+    const errors = validateCleanerSignUp(input)
+    expect(hasErrors(errors)).toBe(true)
+    if (!hasErrors(errors)) {
+      store.signUp({
+        name: input.fullName,
+        email: input.email,
+        mobileNumber: input.mobileNumber,
+        password: input.password,
+        role: 'cleaner',
+      })
+    }
+    expect(store.users.length).toBe(sizeBefore)
+    expect(store.currentUser).toBeNull()
+  })
+})
+
+describe('5.5 fence — an invalid login does not call store.logIn', () => {
+  it('blank login: validator flags and logIn is not called, so currentUser stays null', () => {
+    setActivePinia(createPinia())
+    const store = useCurrentUserStore()
+    const errors = validateLogin({ email: '', password: '' })
+    expect(hasErrors(errors)).toBe(true)
+    if (!hasErrors(errors)) {
+      store.logIn('', '')
+    }
+    expect(store.currentUser).toBeNull()
+  })
+
+  it('bad-email login: validator flags and logIn is not called', () => {
+    setActivePinia(createPinia())
+    const store = useCurrentUserStore()
+    const errors = validateLogin({ email: 'not-an-email', password: 'anything' })
+    expect(errors.email).toBe(ERRORS.invalidEmail)
+    if (!hasErrors(errors)) {
+      store.logIn('not-an-email', 'anything')
+    }
+    expect(store.currentUser).toBeNull()
+  })
+})

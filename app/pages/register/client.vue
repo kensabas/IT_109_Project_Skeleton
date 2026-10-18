@@ -1,17 +1,21 @@
 <!--
-  /register/client — F-01 Phase 3.3 + 4.4 (sign-up logic).
-  Fields from the plan's approved-screens table (row 3).
+  /register/client — F-01 Phase 3.3 + 4.4 + 5.5 (validation wiring).
 
-  Phase 4 scope: adds the sign-up to the in-memory mock list via the
-  currentUser Pinia store. No validation (Phase 5) — a sign-up with
-  blank fields will be accepted; that's a known gap, listed in the
-  Phase 4 run-status. Duplicate email is handled in 4.4.1.
-  Navigation to /welcome lands in 4.5.
+  Phase 5 scope: run validateClientSignUp before signUp. If validation
+  fails, show per-field errors and do NOT call signUp. If validation
+  passes and signUp fails (duplicate email), show the duplicate message
+  under the email field.
 -->
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useCurrentUserStore } from '~/stores/currentUser'
 import type { ClientType } from '~/data/mockUsers'
+import {
+  validateClientSignUp,
+  hasErrors,
+  type FieldErrors,
+  type ClientSignUpField,
+} from '~/utils/validation'
 
 const clientType = ref('')
 const fullName = ref('')
@@ -19,7 +23,7 @@ const email = ref('')
 const mobileNumber = ref('')
 const password = ref('')
 const confirmPassword = ref('')
-const emailError = ref('')
+const fieldErrors = ref<FieldErrors<ClientSignUpField>>({})
 
 const clientTypeOptions = [
   { value: 'homeowner', label: 'Homeowner' },
@@ -31,6 +35,22 @@ const clientTypeOptions = [
 const currentUser = useCurrentUserStore()
 
 function onSubmit() {
+  // 5.5 — clear and re-check on every submit.
+  fieldErrors.value = {}
+
+  const errors = validateClientSignUp({
+    clientType: clientType.value,
+    fullName: fullName.value,
+    email: email.value,
+    mobileNumber: mobileNumber.value,
+    password: password.value,
+    confirmPassword: confirmPassword.value,
+  })
+  if (hasErrors(errors)) {
+    fieldErrors.value = errors
+    return
+  }
+
   const result = currentUser.signUp({
     name: fullName.value,
     email: email.value,
@@ -40,10 +60,11 @@ function onSubmit() {
     clientType: (clientType.value as ClientType) || undefined,
   })
   if (!result.ok) {
-    emailError.value = result.error
+    // Duplicate-email message surfaces under the email field,
+    // after validation already passed.
+    fieldErrors.value = { email: result.error }
     return
   }
-  emailError.value = ''
   navigateTo('/welcome')
 }
 </script>
@@ -60,6 +81,7 @@ function onSubmit() {
         label="Client type"
         placeholder="Choose one…"
         :options="clientTypeOptions"
+        :error="fieldErrors.clientType"
         required
       />
       <TextField
@@ -68,6 +90,7 @@ function onSubmit() {
         label="Full name"
         type="text"
         autocomplete="name"
+        :error="fieldErrors.fullName"
         required
       />
       <TextField
@@ -77,7 +100,7 @@ function onSubmit() {
         type="email"
         placeholder="you@example.com"
         autocomplete="email"
-        :error="emailError"
+        :error="fieldErrors.email"
         required
       />
       <TextField
@@ -87,6 +110,7 @@ function onSubmit() {
         type="tel"
         placeholder="09XX XXX XXXX"
         autocomplete="tel"
+        :error="fieldErrors.mobileNumber"
         required
       />
       <TextField
@@ -95,6 +119,7 @@ function onSubmit() {
         label="Password"
         type="password"
         autocomplete="new-password"
+        :error="fieldErrors.password"
         required
       />
       <TextField
@@ -103,6 +128,7 @@ function onSubmit() {
         label="Confirm password"
         type="password"
         autocomplete="new-password"
+        :error="fieldErrors.confirmPassword"
         required
       />
       <BaseButton type="submit">Create account</BaseButton>

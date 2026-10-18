@@ -1,32 +1,41 @@
 <!--
-  /login — F-01 Phase 3.1 (3.5.2 added links) + 4.3 (login logic).
-  Fields and content from the plan's approved-screens table (row 1).
+  /login — F-01 Phase 3.1 + 4.3 + 5.5 (validation wiring).
+  Fields from the plan's approved-screens table (row 1).
 
-  Phase 4 scope: real login against the mock user list via the
-  currentUser Pinia store. Still no validation (Phase 5): fields hold
-  what is typed, submit is intercepted, the store returns a single
-  "Email or password is incorrect." message for a bad email or a wrong
-  password.
-
-  Navigation to /welcome on success lands in Phase 4.5.
+  Phase 5 scope: client-side validation on submit via the shared
+  validateLogin() rules in app/utils/validation.ts. If validation fails,
+  the store is NOT called. If validation passes but credentials are
+  wrong, the shared "Email or password is incorrect." message is shown
+  as a form-level alert.
 -->
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useCurrentUserStore } from '~/stores/currentUser'
+import { validateLogin, hasErrors, type FieldErrors, type LoginField } from '~/utils/validation'
 
 const email = ref('')
 const password = ref('')
+const fieldErrors = ref<FieldErrors<LoginField>>({})
 const formError = ref('')
 
 const currentUser = useCurrentUserStore()
 
 function onSubmit() {
+  // 5.5 — clear and re-check on every submit, do not auto-validate while typing.
+  fieldErrors.value = {}
+  formError.value = ''
+
+  const errors = validateLogin({ email: email.value, password: password.value })
+  if (hasErrors(errors)) {
+    fieldErrors.value = errors
+    return
+  }
+
   const result = currentUser.logIn(email.value, password.value)
   if (!result.ok) {
     formError.value = result.error
     return
   }
-  formError.value = ''
   navigateTo('/welcome')
 }
 </script>
@@ -44,6 +53,7 @@ function onSubmit() {
         type="email"
         placeholder="you@example.com"
         autocomplete="email"
+        :error="fieldErrors.email"
         required
       />
       <TextField
@@ -52,11 +62,11 @@ function onSubmit() {
         label="Password"
         type="password"
         autocomplete="current-password"
+        :error="fieldErrors.password"
         required
       />
 
-      <!-- Shared "incorrect credentials" message. Uses the same error
-           color as field-level errors so it fits the error styling. -->
+      <!-- Form-level, shared "incorrect credentials" message. -->
       <p v-if="formError" class="login-form__error" role="alert">
         {{ formError }}
       </p>
