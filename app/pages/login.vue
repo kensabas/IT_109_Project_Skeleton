@@ -27,7 +27,7 @@ function onSubmit() {
     return
   }
   formError.value = ''
-  // Phase 4.5 adds the navigation to /welcome.
+  navigateTo('/welcome')
 }
 </script>
 
