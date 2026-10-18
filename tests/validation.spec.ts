@@ -283,7 +283,7 @@ describe('5.4 confirm password — validateCleanerSignUp', () => {
 
 import { setActivePinia, createPinia } from 'pinia'
 import { useCurrentUserStore } from '../app/stores/currentUser'
-import { hasErrors } from '../app/utils/validation'
+import { hasErrors, firstErroredField } from '../app/utils/validation'
 
 describe('5.5 fence — a blank client sign-up does not add a user to the store', () => {
   it('validator flags errors AND the store list stays the same size', () => {
@@ -366,5 +366,36 @@ describe('5.5 fence — an invalid login does not call store.logIn', () => {
       store.logIn('not-an-email', 'anything')
     }
     expect(store.currentUser).toBeNull()
+  })
+})
+
+// ---------- 5.5.2 Focus-target helper ----------
+
+describe('5.5.2 firstErroredField — returns the first field (in display order) with an error', () => {
+  it('returns null when there are no errors', () => {
+    expect(firstErroredField({}, ['email', 'password'])).toBeNull()
+  })
+
+  it('returns the earliest field that has an error', () => {
+    const errors = { password: ERRORS.required } as const
+    expect(firstErroredField(errors, ['email', 'password'])).toBe('password')
+  })
+
+  it('respects the ORDER argument, not the key order on the errors object', () => {
+    const errors = { confirmPassword: 'x', fullName: 'y' } as const
+    const result = firstErroredField(errors, [
+      'clientType',
+      'fullName',
+      'email',
+      'mobileNumber',
+      'password',
+      'confirmPassword',
+    ])
+    expect(result).toBe('fullName')
+  })
+
+  it('returns null when every ordered field has no entry in errors', () => {
+    const errors = { somethingElse: 'x' } as any
+    expect(firstErroredField(errors, ['email', 'password'])).toBeNull()
   })
 })

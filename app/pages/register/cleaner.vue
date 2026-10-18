@@ -7,11 +7,12 @@
   under the email field.
 -->
 <script setup lang="ts">
-import { ref } from 'vue'
+import { nextTick, ref } from 'vue'
 import { useCurrentUserStore } from '~/stores/currentUser'
 import {
   validateCleanerSignUp,
   hasErrors,
+  firstErroredField,
   type FieldErrors,
   type CleanerSignUpField,
 } from '~/utils/validation'
@@ -23,9 +24,25 @@ const password = ref('')
 const confirmPassword = ref('')
 const fieldErrors = ref<FieldErrors<CleanerSignUpField>>({})
 
+// 5.5.2 — display order + name-to-id map.
+const CLEANER_ORDER: readonly CleanerSignUpField[] = [
+  'fullName',
+  'email',
+  'mobileNumber',
+  'password',
+  'confirmPassword',
+]
+const CLEANER_FIELD_IDS: Record<CleanerSignUpField, string> = {
+  fullName: 'cleaner-full-name',
+  email: 'cleaner-email',
+  mobileNumber: 'cleaner-mobile',
+  password: 'cleaner-password',
+  confirmPassword: 'cleaner-confirm-password',
+}
+
 const currentUser = useCurrentUserStore()
 
-function onSubmit() {
+async function onSubmit() {
   // 5.5 — clear and re-check on every submit.
   fieldErrors.value = {}
 
@@ -38,6 +55,9 @@ function onSubmit() {
   })
   if (hasErrors(errors)) {
     fieldErrors.value = errors
+    await nextTick()
+    const first = firstErroredField(errors, CLEANER_ORDER)
+    if (first) document.getElementById(CLEANER_FIELD_IDS[first])?.focus()
     return
   }
 
@@ -50,6 +70,8 @@ function onSubmit() {
   })
   if (!result.ok) {
     fieldErrors.value = { email: result.error }
+    await nextTick()
+    document.getElementById(CLEANER_FIELD_IDS.email)?.focus()
     return
   }
   navigateTo('/welcome')

@@ -7,12 +7,13 @@
   under the email field.
 -->
 <script setup lang="ts">
-import { ref } from 'vue'
+import { nextTick, ref } from 'vue'
 import { useCurrentUserStore } from '~/stores/currentUser'
 import type { ClientType } from '~/data/mockUsers'
 import {
   validateClientSignUp,
   hasErrors,
+  firstErroredField,
   type FieldErrors,
   type ClientSignUpField,
 } from '~/utils/validation'
@@ -32,9 +33,27 @@ const clientTypeOptions = [
   { value: 'business', label: 'Business' },
 ]
 
+// 5.5.2 — display order + name-to-id map.
+const CLIENT_ORDER: readonly ClientSignUpField[] = [
+  'clientType',
+  'fullName',
+  'email',
+  'mobileNumber',
+  'password',
+  'confirmPassword',
+]
+const CLIENT_FIELD_IDS: Record<ClientSignUpField, string> = {
+  clientType: 'client-type',
+  fullName: 'client-full-name',
+  email: 'client-email',
+  mobileNumber: 'client-mobile',
+  password: 'client-password',
+  confirmPassword: 'client-confirm-password',
+}
+
 const currentUser = useCurrentUserStore()
 
-function onSubmit() {
+async function onSubmit() {
   // 5.5 — clear and re-check on every submit.
   fieldErrors.value = {}
 
@@ -48,6 +67,9 @@ function onSubmit() {
   })
   if (hasErrors(errors)) {
     fieldErrors.value = errors
+    await nextTick()
+    const first = firstErroredField(errors, CLIENT_ORDER)
+    if (first) document.getElementById(CLIENT_FIELD_IDS[first])?.focus()
     return
   }
 
@@ -61,8 +83,10 @@ function onSubmit() {
   })
   if (!result.ok) {
     // Duplicate-email message surfaces under the email field,
-    // after validation already passed.
+    // after validation already passed. Also move focus there.
     fieldErrors.value = { email: result.error }
+    await nextTick()
+    document.getElementById(CLIENT_FIELD_IDS.email)?.focus()
     return
   }
   navigateTo('/welcome')

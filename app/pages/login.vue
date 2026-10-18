@@ -9,18 +9,32 @@
   as a form-level alert.
 -->
 <script setup lang="ts">
-import { ref } from 'vue'
+import { nextTick, ref } from 'vue'
 import { useCurrentUserStore } from '~/stores/currentUser'
-import { validateLogin, hasErrors, type FieldErrors, type LoginField } from '~/utils/validation'
+import {
+  validateLogin,
+  hasErrors,
+  firstErroredField,
+  type FieldErrors,
+  type LoginField,
+} from '~/utils/validation'
 
 const email = ref('')
 const password = ref('')
 const fieldErrors = ref<FieldErrors<LoginField>>({})
 const formError = ref('')
 
+// 5.5.2 — fixed display order; the first field in this list with an
+// error gets focus. Also the name-to-id map for document.getElementById.
+const LOGIN_ORDER: readonly LoginField[] = ['email', 'password']
+const LOGIN_FIELD_IDS: Record<LoginField, string> = {
+  email: 'login-email',
+  password: 'login-password',
+}
+
 const currentUser = useCurrentUserStore()
 
-function onSubmit() {
+async function onSubmit() {
   // 5.5 — clear and re-check on every submit, do not auto-validate while typing.
   fieldErrors.value = {}
   formError.value = ''
@@ -28,6 +42,9 @@ function onSubmit() {
   const errors = validateLogin({ email: email.value, password: password.value })
   if (hasErrors(errors)) {
     fieldErrors.value = errors
+    await nextTick()
+    const first = firstErroredField(errors, LOGIN_ORDER)
+    if (first) document.getElementById(LOGIN_FIELD_IDS[first])?.focus()
     return
   }
 

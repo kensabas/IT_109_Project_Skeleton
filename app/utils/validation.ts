@@ -39,6 +39,19 @@ export function hasErrors<T extends string>(errors: FieldErrors<T>): boolean {
   return Object.keys(errors).length > 0
 }
 
+// 5.5.2 — returns the earliest field (per the given display order) that
+// has an error, or null when there is none. Pages pair this with a
+// name-to-id map to decide which DOM element to focus.
+export function firstErroredField<T extends string>(
+  errors: FieldErrors<T>,
+  order: readonly T[],
+): T | null {
+  for (const field of order) {
+    if (errors[field]) return field
+  }
+  return null
+}
+
 function isBlank(value: string): boolean {
   return value.trim().length === 0
 }
