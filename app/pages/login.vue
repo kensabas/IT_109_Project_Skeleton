@@ -41,9 +41,9 @@ const password = ref('')
       />
       <BaseButton type="submit">Log in</BaseButton>
 
-      <!-- 3.5.2 will wire this NuxtLink to /register. -->
-      <p class="login-form__alt" data-link-slot="create-account">
-        Don't have an account? <span class="login-form__link-placeholder">Create an account</span>
+      <p class="login-form__alt">
+        Don't have an account?
+        <NuxtLink to="/register" class="login-form__link">Create an account</NuxtLink>
       </p>
     </form>
 
@@ -67,7 +67,7 @@ const password = ref('')
   text-align: center;
 }
 
-.login-form__link-placeholder {
+.login-form__link {
   color: var(--color-teal-dark);
   font-weight: 600;
 }

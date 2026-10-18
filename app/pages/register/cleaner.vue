@@ -83,12 +83,12 @@ const confirmPassword = ref('')
 
       <BaseButton type="submit">Create account</BaseButton>
 
-      <!-- 3.5.2 will wire these to /register and /login. -->
-      <p class="signup-form__alt" data-link-slot="back-to-choice">
-        <span class="signup-form__link-placeholder">Back</span> to account type
+      <p class="signup-form__alt">
+        <NuxtLink to="/register" class="signup-form__link">Back</NuxtLink> to account type
       </p>
-      <p class="signup-form__alt" data-link-slot="to-login">
-        Already have an account? <span class="signup-form__link-placeholder">Log in</span>
+      <p class="signup-form__alt">
+        Already have an account?
+        <NuxtLink to="/login" class="signup-form__link">Log in</NuxtLink>
       </p>
     </form>
   </AuthLayout>
@@ -108,7 +108,7 @@ const confirmPassword = ref('')
   text-align: center;
 }
 
-.signup-form__link-placeholder {
+.signup-form__link {
   color: var(--color-teal-dark);
   font-weight: 600;
 }

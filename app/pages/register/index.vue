@@ -18,20 +18,18 @@
     sub-text="Which best describes you?"
   >
     <div class="choice-list">
-      <!-- 3.5.2 will swap this for <NuxtLink to="/register/client"> -->
-      <div class="choice-card" data-link-slot="choice-client">
+      <NuxtLink to="/register/client" class="choice-card">
         <span class="choice-card__title">I need cleaners</span>
-      </div>
+      </NuxtLink>
 
-      <!-- 3.5.2 will swap this for <NuxtLink to="/register/cleaner"> -->
-      <div class="choice-card" data-link-slot="choice-cleaner">
+      <NuxtLink to="/register/cleaner" class="choice-card">
         <span class="choice-card__title">I am a cleaner</span>
-      </div>
+      </NuxtLink>
     </div>
 
-    <!-- 3.5.2 will wire this to /login. -->
-    <p class="choice-alt" data-link-slot="to-login">
-      Already have an account? <span class="choice-alt__link-placeholder">Log in</span>
+    <p class="choice-alt">
+      Already have an account?
+      <NuxtLink to="/login" class="choice-alt__link">Log in</NuxtLink>
     </p>
   </AuthLayout>
 </template>
@@ -54,6 +52,15 @@
   cursor: pointer;
 }
 
+.choice-card:focus-visible {
+  outline: 2px solid var(--color-teal);
+  outline-offset: 2px;
+}
+
+.choice-card:hover {
+  border-color: var(--color-teal);
+}
+
 .choice-card__title {
   font-size: 18px;
   font-weight: 700;
@@ -66,7 +73,7 @@
   color: var(--color-text-soft);
 }
 
-.choice-alt__link-placeholder {
+.choice-alt__link {
   color: var(--color-teal-dark);
   font-weight: 600;
 }
