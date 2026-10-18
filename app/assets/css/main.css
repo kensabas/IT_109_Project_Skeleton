@@ -1,0 +1,62 @@
+/* CleanLinis global styles — F-01 Phase 1
+ * Design tokens come from the approved mockup (2026-10-18).
+ * Values here are the single source of truth for colors, radii, and control sizes.
+ */
+
+:root {
+  /* Brand + text */
+  --color-teal: #0E7C7B;         /* main buttons and links */
+  --color-teal-dark: #0B6665;    /* link text (darker teal) */
+  --color-text: #0F2A2E;         /* dark body text */
+  --color-text-soft: #4A6663;    /* soft/secondary text */
+
+  /* Surfaces */
+  --color-bg: #F4F7F6;           /* page background */
+  --color-card: #FFFFFF;         /* card background */
+  --color-card-border: #DDE6E4;  /* card border */
+  --color-input-border: #7A9490; /* input border */
+
+  /* Notice */
+  --color-notice-bg: #FDF1D6;    /* notice background */
+  --color-notice-text: #5C3F00;  /* notice text */
+
+  /* Accent */
+  --color-accent: #F2B33D;       /* accent yellow */
+
+  /* Shape */
+  --radius-card: 16px;
+  --radius-control: 12px;        /* inputs and buttons: 10–12px range, 12px chosen */
+
+  /* Control sizes */
+  --control-height-input: 48px;
+  --control-height-button: 52px;
+
+  /* Typography */
+  --font-family-base: 'Plus Jakarta Sans', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  --font-size-base: 16px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: var(--font-size-base);
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: var(--color-teal-dark);
+}
