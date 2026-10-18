@@ -101,6 +101,9 @@ export function validateClientSignUp(
   if (isBlank(input.password)) errors.password = ERRORS.required
   else if (input.password.length < MIN_PASSWORD_LENGTH) errors.password = ERRORS.shortPassword
   if (isBlank(input.confirmPassword)) errors.confirmPassword = ERRORS.required
+  else if (input.password && input.password !== input.confirmPassword) {
+    errors.confirmPassword = ERRORS.confirmMismatch
+  }
 
   return errors
 }
@@ -136,6 +139,9 @@ export function validateCleanerSignUp(
   if (isBlank(input.password)) errors.password = ERRORS.required
   else if (input.password.length < MIN_PASSWORD_LENGTH) errors.password = ERRORS.shortPassword
   if (isBlank(input.confirmPassword)) errors.confirmPassword = ERRORS.required
+  else if (input.password && input.password !== input.confirmPassword) {
+    errors.confirmPassword = ERRORS.confirmMismatch
+  }
 
   return errors
 }

@@ -222,3 +222,55 @@ describe('5.3 password min length — validateLogin DOES NOT enforce it', () => 
     expect(errors.password).toBeUndefined()
   })
 })
+
+// ---------- 5.4 Confirm password must match ----------
+
+describe('5.4 confirm password — validateClientSignUp', () => {
+  const base = {
+    clientType: 'homeowner',
+    fullName: 'Someone Reyes',
+    email: 'ok@example.com',
+    mobileNumber: '09170001234',
+  }
+  it('flags a mismatched confirmPassword', () => {
+    const errors = validateClientSignUp({
+      ...base,
+      password: 'password123',
+      confirmPassword: 'password124',
+    })
+    expect(errors.confirmPassword).toBe(ERRORS.confirmMismatch)
+  })
+  it('does not flag mismatch when confirm is blank (required wins)', () => {
+    const errors = validateClientSignUp({
+      ...base,
+      password: 'password123',
+      confirmPassword: '',
+    })
+    expect(errors.confirmPassword).toBe(ERRORS.required)
+  })
+  it('accepts matching passwords', () => {
+    const errors = validateClientSignUp({
+      ...base,
+      password: 'password123',
+      confirmPassword: 'password123',
+    })
+    expect(errors.confirmPassword).toBeUndefined()
+    expect(errors.password).toBeUndefined()
+  })
+})
+
+describe('5.4 confirm password — validateCleanerSignUp', () => {
+  const base = {
+    fullName: 'Someone Reyes',
+    email: 'ok@example.com',
+    mobileNumber: '09170001234',
+  }
+  it('flags a mismatched confirmPassword', () => {
+    const errors = validateCleanerSignUp({
+      ...base,
+      password: 'password123',
+      confirmPassword: 'different1',
+    })
+    expect(errors.confirmPassword).toBe(ERRORS.confirmMismatch)
+  })
+})
