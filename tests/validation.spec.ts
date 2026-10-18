@@ -156,3 +156,69 @@ describe('5.2 email format — validateCleanerSignUp', () => {
     expect(errors.email).toBeUndefined()
   })
 })
+
+// ---------- 5.3 Password min 8 characters (sign-up only) ----------
+
+describe('5.3 password min length — validateClientSignUp', () => {
+  const base = {
+    clientType: 'homeowner',
+    fullName: 'Someone Reyes',
+    email: 'ok@example.com',
+    mobileNumber: '09170001234',
+  }
+  it('rejects a 7-char password', () => {
+    const errors = validateClientSignUp({
+      ...base,
+      password: 'short12',
+      confirmPassword: 'short12',
+    })
+    expect(errors.password).toBe(ERRORS.shortPassword)
+  })
+  it('accepts an exactly-8-char password', () => {
+    const errors = validateClientSignUp({
+      ...base,
+      password: '12345678',
+      confirmPassword: '12345678',
+    })
+    expect(errors.password).toBeUndefined()
+  })
+  it('accepts a longer password', () => {
+    const errors = validateClientSignUp({
+      ...base,
+      password: 'longpassword',
+      confirmPassword: 'longpassword',
+    })
+    expect(errors.password).toBeUndefined()
+  })
+})
+
+describe('5.3 password min length — validateCleanerSignUp', () => {
+  const base = {
+    fullName: 'Someone Reyes',
+    email: 'ok@example.com',
+    mobileNumber: '09170001234',
+  }
+  it('rejects a 7-char password', () => {
+    const errors = validateCleanerSignUp({
+      ...base,
+      password: 'short12',
+      confirmPassword: 'short12',
+    })
+    expect(errors.password).toBe(ERRORS.shortPassword)
+  })
+  it('accepts an exactly-8-char password', () => {
+    const errors = validateCleanerSignUp({
+      ...base,
+      password: '12345678',
+      confirmPassword: '12345678',
+    })
+    expect(errors.password).toBeUndefined()
+  })
+})
+
+describe('5.3 password min length — validateLogin DOES NOT enforce it', () => {
+  it('accepts a short password on login (so wrong-credentials path still runs)', () => {
+    const errors = validateLogin({ email: 'ok@example.com', password: 'x' })
+    expect(errors.password).toBeUndefined()
+  })
+})

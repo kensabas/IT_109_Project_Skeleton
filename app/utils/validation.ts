@@ -99,6 +99,7 @@ export function validateClientSignUp(
   else if (!isValidEmail(input.email)) errors.email = ERRORS.invalidEmail
   if (isBlank(input.mobileNumber)) errors.mobileNumber = ERRORS.required
   if (isBlank(input.password)) errors.password = ERRORS.required
+  else if (input.password.length < MIN_PASSWORD_LENGTH) errors.password = ERRORS.shortPassword
   if (isBlank(input.confirmPassword)) errors.confirmPassword = ERRORS.required
 
   return errors
@@ -133,6 +134,7 @@ export function validateCleanerSignUp(
   else if (!isValidEmail(input.email)) errors.email = ERRORS.invalidEmail
   if (isBlank(input.mobileNumber)) errors.mobileNumber = ERRORS.required
   if (isBlank(input.password)) errors.password = ERRORS.required
+  else if (input.password.length < MIN_PASSWORD_LENGTH) errors.password = ERRORS.shortPassword
   if (isBlank(input.confirmPassword)) errors.confirmPassword = ERRORS.required
 
   return errors
