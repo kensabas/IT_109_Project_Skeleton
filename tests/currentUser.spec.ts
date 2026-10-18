@@ -136,3 +136,61 @@ describe('currentUser store — 4.4 signUp adds to the mock list', () => {
     expect(store.currentUser?.email).toBe('luis.aquino@example.com')
   })
 })
+
+describe('currentUser store — 4.4.1 block duplicate email', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+
+  it('rejects a sign-up with an email already in the mock list', () => {
+    const store = useCurrentUserStore()
+    const sizeBefore = store.users.length
+    const result = store.signUp({
+      name: 'Different Person',
+      email: 'maria.santos@example.com', // already a sample client
+      mobileNumber: '09170009999',
+      password: 'AnotherPass9',
+      role: 'client',
+      clientType: 'homeowner',
+    })
+    expect(result.ok).toBe(false)
+    if (result.ok === false) {
+      expect(result.error).toMatch(/already/i)
+    }
+    expect(store.users.length).toBe(sizeBefore)
+    expect(store.currentUser).toBeNull()
+  })
+
+  it('matches duplicate emails case-insensitively', () => {
+    const store = useCurrentUserStore()
+    const result = store.signUp({
+      name: 'Different Person',
+      email: 'MARIA.SANTOS@example.com',
+      mobileNumber: '09170009999',
+      password: 'AnotherPass9',
+      role: 'client',
+      clientType: 'homeowner',
+    })
+    expect(result.ok).toBe(false)
+  })
+
+  it('blocks a second sign-up with the same email', () => {
+    const store = useCurrentUserStore()
+    store.signUp({
+      name: 'First',
+      email: 'twice@example.com',
+      mobileNumber: '09170001111',
+      password: 'Firstpass9',
+      role: 'cleaner',
+    })
+    store.logOut()
+    const result = store.signUp({
+      name: 'Second',
+      email: 'twice@example.com',
+      mobileNumber: '09170002222',
+      password: 'Secondpass9',
+      role: 'cleaner',
+    })
+    expect(result.ok).toBe(false)
+  })
+})

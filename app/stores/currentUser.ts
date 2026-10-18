@@ -34,6 +34,10 @@ function normalizeEmail(email: string): string {
 // The plan allows this ("one message for both cases is fine").
 const INVALID_CREDENTIALS_MESSAGE = 'Email or password is incorrect.'
 
+// Shown under the email field when a sign-up uses an email already in
+// the list. Phase 4.4.1.
+const DUPLICATE_EMAIL_MESSAGE = 'An account with this email already exists.'
+
 export type AuthResult = { ok: true } | { ok: false; error: string }
 
 export const useCurrentUserStore = defineStore('currentUser', {
@@ -64,8 +68,16 @@ export const useCurrentUserStore = defineStore('currentUser', {
     },
 
     // Appends the new user to the in-memory list and signs them in.
-    // Duplicate-email checking is added in 4.4.1.
+    // Blocks the sign-up if the email is already in the list (4.4.1,
+    // case-insensitive; unconfirmed choice, see Phase 4 run-status).
     signUp(newUser: MockUser): AuthResult {
+      const needle = normalizeEmail(newUser.email)
+      const already = this.users.some(
+        (u) => normalizeEmail(u.email) === needle,
+      )
+      if (already) {
+        return { ok: false, error: DUPLICATE_EMAIL_MESSAGE }
+      }
       this.users.push(newUser)
       this.currentUser = newUser
       return { ok: true }
