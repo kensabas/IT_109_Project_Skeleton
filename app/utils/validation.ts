@@ -19,6 +19,16 @@ export const ERRORS = {
   confirmMismatch: 'Passwords do not match.',
 } as const
 
+// Simple "something@something.something" rule per the Phase 5 prompt.
+// Rejects whitespace in any of the three parts and requires at least
+// one character on each side of @ and of the final dot. Not RFC 5322;
+// enough for a demo form. Reported as unconfirmed in the run-status.
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+function isValidEmail(value: string): boolean {
+  return EMAIL_REGEX.test(value.trim())
+}
+
 // -----------------------------------------------------------------------
 // Shared helpers
 // -----------------------------------------------------------------------
@@ -48,6 +58,8 @@ export function validateLogin(input: LoginInput): FieldErrors<LoginField> {
 
   if (isBlank(input.email)) {
     errors.email = ERRORS.required
+  } else if (!isValidEmail(input.email)) {
+    errors.email = ERRORS.invalidEmail
   }
   if (isBlank(input.password)) {
     errors.password = ERRORS.required
@@ -84,6 +96,7 @@ export function validateClientSignUp(
   if (isBlank(input.clientType)) errors.clientType = ERRORS.required
   if (isBlank(input.fullName)) errors.fullName = ERRORS.required
   if (isBlank(input.email)) errors.email = ERRORS.required
+  else if (!isValidEmail(input.email)) errors.email = ERRORS.invalidEmail
   if (isBlank(input.mobileNumber)) errors.mobileNumber = ERRORS.required
   if (isBlank(input.password)) errors.password = ERRORS.required
   if (isBlank(input.confirmPassword)) errors.confirmPassword = ERRORS.required
@@ -117,6 +130,7 @@ export function validateCleanerSignUp(
 
   if (isBlank(input.fullName)) errors.fullName = ERRORS.required
   if (isBlank(input.email)) errors.email = ERRORS.required
+  else if (!isValidEmail(input.email)) errors.email = ERRORS.invalidEmail
   if (isBlank(input.mobileNumber)) errors.mobileNumber = ERRORS.required
   if (isBlank(input.password)) errors.password = ERRORS.required
   if (isBlank(input.confirmPassword)) errors.confirmPassword = ERRORS.required
