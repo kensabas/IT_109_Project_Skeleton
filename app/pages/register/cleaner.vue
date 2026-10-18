@@ -174,5 +174,11 @@ async function onSubmit() {
 .signup-form__link {
   color: var(--color-teal-dark);
   font-weight: 600;
+  border-radius: 2px;
+}
+
+.signup-form__link:focus-visible {
+  outline: 2px solid var(--color-teal);
+  outline-offset: 2px;
 }
 </style>
