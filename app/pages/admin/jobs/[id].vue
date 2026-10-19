@@ -286,9 +286,10 @@ function doArchive() {
 .admin-shell__brand { display: flex; align-items: center; gap: 10px; }
 .admin-shell__wordmark { font-size: 18px; font-weight: 800; color: var(--color-text); letter-spacing: -0.01em; }
 .admin-shell__tag {
-  padding: 2px 8px; font-size: 12px; font-weight: 700;
+  padding: 3px 10px; font-size: 11px; font-weight: 700;
   color: var(--color-teal-dark); background-color: #D9F0EF;
-  border-radius: 999px; text-transform: uppercase; letter-spacing: 0.04em;
+  border: 1px solid rgba(11, 102, 101, 0.14);
+  border-radius: 999px; text-transform: uppercase; letter-spacing: 0.08em;
 }
 .admin-shell__who { margin: 0; font-size: 13px; color: var(--color-text-soft); }
 
@@ -364,17 +365,59 @@ function doArchive() {
   background-color: var(--color-card);
   border: 1px solid var(--color-card-border);
   border-radius: var(--radius-card);
-  padding: 20px;
+  box-shadow: var(--shadow-card-lg);
+  padding: 22px 22px 20px;
 }
-.card__title { margin: 0 0 12px; font-size: 18px; font-weight: 700; color: var(--color-text); }
+.card__title {
+  margin: 0 0 14px;
+  padding-bottom: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--color-divider);
+}
 .card__subtitle { margin: 0 0 6px; font-size: 14px; font-weight: 700; color: var(--color-text); }
-.card__divider { border: none; border-top: 1px solid var(--color-card-border); margin: 16px 0; }
+.card__divider { border: none; border-top: 1px solid var(--color-divider); margin: 16px 0; }
 .card__description { margin: 0; font-size: 14px; line-height: 1.6; color: var(--color-text); }
 
-.info-list { margin: 0; display: grid; grid-template-columns: 120px 1fr; row-gap: 10px; column-gap: 12px; }
+/* Info list — rows are visually tabular: thin dividers, consistent
+ * baseline, label uppercase micro-caps on the left, value tabular-num
+ * where it's a number/date. Reads like a compact table on narrow
+ * screens too, because we collapse to a single column via contents. */
+.info-list {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  row-gap: 0;
+  column-gap: 12px;
+}
 .info-list__row { display: contents; }
-.info-list dt { font-size: 13px; color: var(--color-text-soft); font-weight: 600; }
-.info-list dd { margin: 0; font-size: 14px; color: var(--color-text); }
+.info-list__row > dt,
+.info-list__row > dd {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-divider);
+}
+.info-list__row:last-child > dt,
+.info-list__row:last-child > dd {
+  border-bottom: none;
+}
+.info-list dt {
+  font-size: 11px;
+  color: var(--color-text-soft);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  align-self: center;
+}
+.info-list dd {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
 
 /* Cleaner card */
 .cleaner { display: flex; gap: 14px; align-items: flex-start; }
@@ -392,11 +435,15 @@ function doArchive() {
 .cleaner__none { margin: 0; font-size: 14px; color: var(--color-text-soft); font-style: italic; }
 
 .pill {
-  display: inline-flex; align-items: center; min-height: 20px; padding: 1px 8px;
-  font-size: 12px; font-weight: 600; border-radius: 999px;
+  display: inline-flex; align-items: center; min-height: 22px; padding: 2px 10px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.04em; border-radius: 999px;
   background-color: #D9F0EF; color: var(--color-teal-dark);
+  box-shadow: inset 0 0 0 1px rgba(11, 102, 101, 0.18);
 }
-.pill--state { background-color: #DDF1E3; color: #1E6B3A; }
+.pill--state {
+  background-color: #DDF1E3; color: #1E6B3A;
+  box-shadow: inset 0 0 0 1px rgba(30, 107, 58, 0.18);
+}
 
 /* Status card */
 .status-list { list-style: none; margin: 0 0 14px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
@@ -438,6 +485,7 @@ function doArchive() {
   background-color: var(--color-card);
   border: 1px solid var(--color-card-border);
   border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card-lg);
   padding: 24px;
 }
 </style>

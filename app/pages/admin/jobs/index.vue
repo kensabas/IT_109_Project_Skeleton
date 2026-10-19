@@ -157,8 +157,8 @@ const COLUMNS: { key: ColumnKey; label: string }[] = [
                   </NuxtLink>
                 </td>
                 <td>{{ job.clientName }}</td>
-                <td>{{ formatDate(job.date) }}</td>
-                <td>{{ peso.format(job.ratePhp) }}</td>
+                <td class="jobs-table__date">{{ formatDate(job.date) }}</td>
+                <td class="jobs-table__num">{{ peso.format(job.ratePhp) }}</td>
                 <td>
                   <span v-if="cleanerFor(job)">{{ cleanerFor(job)!.name }}</span>
                   <span v-else class="jobs-table__muted">Not assigned</span>
@@ -213,14 +213,15 @@ const COLUMNS: { key: ColumnKey; label: string }[] = [
 }
 
 .admin-shell__tag {
-  padding: 2px 8px;
-  font-size: 12px;
+  padding: 3px 10px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--color-teal-dark);
   background-color: #D9F0EF;
+  border: 1px solid rgba(11, 102, 101, 0.14);
   border-radius: 999px;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
 }
 
 .admin-shell__who {
@@ -266,6 +267,7 @@ const COLUMNS: { key: ColumnKey; label: string }[] = [
   background-color: var(--color-card);
   border: 1px solid var(--color-card-border);
   border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card-lg);
   overflow: hidden;
 }
 .jobs-card__scroll {
@@ -284,26 +286,59 @@ const COLUMNS: { key: ColumnKey; label: string }[] = [
   padding: 0; margin: -1px; overflow: hidden;
   clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
 }
+
+/* Header row — tinted, uppercase micro-label, letter-spaced. */
 .jobs-table thead th {
-  background-color: #F8FAFA;
+  position: relative;
+  background-color: var(--color-table-head-bg);
   border-bottom: 1px solid var(--color-card-border);
   text-align: left;
   padding: 0;
   color: var(--color-text-soft);
-  font-weight: 600;
-  font-size: 12px;
-  letter-spacing: 0.04em;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
+/* Current-sort column: thin teal accent underneath the th label. */
+.jobs-table thead th[aria-sort="ascending"]::after,
+.jobs-table thead th[aria-sort="descending"]::after {
+  content: '';
+  position: absolute;
+  left: 16px; right: 16px; bottom: -1px;
+  height: 2px;
+  background-color: var(--color-teal);
+  border-radius: 2px;
+}
+
 .jobs-table tbody td {
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--color-card-border);
+  padding: 16px;
+  border-bottom: 1px solid var(--color-divider);
   color: var(--color-text);
   vertical-align: middle;
+  transition: background-color 120ms ease;
 }
 .jobs-table tbody tr:last-child td {
   border-bottom: none;
 }
+
+/* Zebra stripes for calm scanning + hover highlight on top. */
+.jobs-table tbody tr:nth-child(even) td {
+  background-color: var(--color-row-stripe);
+}
+.jobs-table tbody tr:hover td,
+.jobs-table tbody tr:focus-within td {
+  background-color: var(--color-row-hover);
+}
+
+/* Tabular numerals so money + dates line up on the vertical. */
+.jobs-table__num,
+.jobs-table__date {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  white-space: nowrap;
+}
+
 .jobs-table__sort {
   all: unset;
   display: flex;
@@ -316,17 +351,26 @@ const COLUMNS: { key: ColumnKey; label: string }[] = [
   color: inherit;
   text-transform: inherit;
   letter-spacing: inherit;
+  transition: color 120ms ease;
+}
+.jobs-table__sort:hover {
+  color: var(--color-text);
 }
 .jobs-table__sort:focus-visible {
   outline: 2px solid var(--color-teal);
   outline-offset: -2px;
 }
 .jobs-table__sort--active {
-  color: var(--color-text);
+  color: var(--color-teal-dark);
 }
 .jobs-table__arrow {
   font-size: 10px;
+  color: var(--color-text-soft);
 }
+.jobs-table__sort--active .jobs-table__arrow {
+  color: var(--color-teal);
+}
+
 .jobs-table__link {
   color: var(--color-teal-dark);
   font-weight: 600;
@@ -342,9 +386,10 @@ const COLUMNS: { key: ColumnKey; label: string }[] = [
 }
 .jobs-table__muted {
   color: var(--color-text-soft);
+  font-style: italic;
 }
 .jobs-table__empty {
-  padding: 36px 16px;
+  padding: 48px 16px;
   text-align: center;
   color: var(--color-text-soft);
 }
