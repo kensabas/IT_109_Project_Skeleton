@@ -43,8 +43,10 @@ export interface Job {
   // Wave 2.1 — where the job is (plan D5: distance from the cleaner's pin).
   barangay: string
   city: string
-  lat: number
-  lng: number
+  // Null when the client did not pin the place (the pin is optional,
+  // plan D13); the marketplace then shows the distance as unknown.
+  lat: number | null
+  lng: number | null
   // The client request this post was published from (F-13). Null for
   // the seeded posts that have no request on file.
   requestId: string | null

@@ -96,6 +96,14 @@ describe('approveRequest / rejectRequest (F-12, F-13)', () => {
     expect(job.assignedCleanerId).toBeNull()
     expect(job.archivedAt).toBeNull()
   })
+  it('a request without a map pin publishes a post with no coordinates (null, not NaN)', () => {
+    const store = useRequestsStore()
+    store.approveRequest('req-006', admin())
+    const job = useJobsStore().getById(store.getById('req-006')!.jobId!)!
+    expect(job.lat).toBeNull()
+    expect(job.lng).toBeNull()
+    expect(JSON.parse(JSON.stringify(job)).lat).toBeNull()
+  })
   it('only admins can approve', () => {
     expect(useRequestsStore().approveRequest('req-005', maria()).ok).toBe(false)
   })

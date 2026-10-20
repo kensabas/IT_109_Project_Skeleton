@@ -81,10 +81,8 @@ export const useJobsStore = defineStore('jobs', {
         archivedAt: null,
         barangay: request.barangay,
         city: request.city,
-        // Without a pin the post has no coordinates of its own; the
-        // marketplace then cannot work out a distance (shown as unknown).
-        lat: request.lat ?? Number.NaN,
-        lng: request.lng ?? Number.NaN,
+        lat: request.lat,
+        lng: request.lng,
         requestId: request.id,
         clientEmail: request.clientEmail,
         postedAt: isoToday(),

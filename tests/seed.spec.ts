@@ -50,7 +50,7 @@ describe('seed — job posts', () => {
     expect(jobs.filter((j) => !j.assignedCleanerId).length).toBeGreaterThanOrEqual(1)
   })
   it('every place is in the Philippines', () => {
-    for (const j of jobs) expect(inPhilippines(j.lat, j.lng)).toBe(true)
+    for (const j of jobs) expect(inPhilippines(j.lat!, j.lng!)).toBe(true)
   })
   it('assigned cleaners are real cleaners', () => {
     for (const j of jobs) if (j.assignedCleanerId) expect(cleaners.map((c) => c.email)).toContain(j.assignedCleanerId)
