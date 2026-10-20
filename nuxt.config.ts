@@ -1,7 +1,9 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
-  devtools: { enabled: true },
+  // Off (Ken's decision, 2026-10-20): @nuxt/devtools 3.4.3 printed a
+  // Vite-hook warning on every `npm run dev` start (I-19).
+  devtools: { enabled: false },
 
   // The mock session and data live in the browser (localStorage), which
   // the server cannot read. Rendering on the server would show every
