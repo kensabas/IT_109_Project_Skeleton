@@ -6,7 +6,7 @@
   Every number is counted from the mock data (app/utils/reports.ts).
 -->
 <script setup lang="ts">
-import { computed, nextTick, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useCurrentUserStore } from '~/stores/currentUser'
 import { useRequestsStore } from '~/stores/requests'
 import { useJobsStore } from '~/stores/jobs'
@@ -203,6 +203,28 @@ function download() {
   link.click()
   URL.revokeObjectURL(link.href)
 }
+// Printing (button or Ctrl+P): open every chart data table so the
+// printout carries the numbers too, then put them back (I-26).
+let closedBeforePrint: HTMLDetailsElement[] = []
+function openTablesForPrint() {
+  // Adds to the list, so a second beforeprint event does not forget them.
+  const closed = [...document.querySelectorAll<HTMLDetailsElement>('details.chart__table:not([open])')]
+  closedBeforePrint.push(...closed)
+  for (const details of closed) details.open = true
+}
+function restoreTablesAfterPrint() {
+  for (const details of closedBeforePrint) details.open = false
+  closedBeforePrint = []
+}
+onMounted(() => {
+  window.addEventListener('beforeprint', openTablesForPrint)
+  window.addEventListener('afterprint', restoreTablesAfterPrint)
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('beforeprint', openTablesForPrint)
+  window.removeEventListener('afterprint', restoreTablesAfterPrint)
+})
+
 function printReport() {
   generatedAt.value = new Date().toISOString()
   window.print()
