@@ -4,7 +4,8 @@
   for the body so pages can put lists, paragraphs, or links inside.
 
   Rendered as <aside> since it is a supporting note, not the main
-  content of the page.
+  content of the page. The title is an h2, the level right under the
+  page's h1 (I-24); its size is set below, so it looks the same.
 -->
 <script setup lang="ts">
 defineProps<{
@@ -14,7 +15,7 @@ defineProps<{
 
 <template>
   <aside class="notice-box">
-    <h3 class="notice-box__title">{{ title }}</h3>
+    <h2 class="notice-box__title">{{ title }}</h2>
     <div class="notice-box__body">
       <slot />
     </div>
