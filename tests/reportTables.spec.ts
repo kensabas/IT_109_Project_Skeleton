@@ -113,3 +113,18 @@ describe('clientReportRows', () => {
     expect(rows.find((r) => r.email === 'j@x')?.repeatClient).toBe('No')
   })
 })
+
+import { niceMax, summarise } from '../app/utils/chartScale'
+describe('chart helpers', () => {
+  it('niceMax rounds up to 1, 2 or 5 × 10^n', () => {
+    expect(niceMax([0])).toBe(1)
+    expect(niceMax([3])).toBe(5)
+    expect(niceMax([7, 2])).toBe(10)
+    expect(niceMax([12])).toBe(20)
+    expect(niceMax([45])).toBe(50)
+  })
+  it('summarise states the total and the highest point', () => {
+    expect(summarise([{ label: 'Mon', value: 2 }, { label: 'Tue', value: 5 }], 'requests')).toBe('7 requests in total. Highest: Tue (5).')
+    expect(summarise([{ label: 'Mon', value: 0 }], 'requests')).toBe('No requests in this period.')
+  })
+})
