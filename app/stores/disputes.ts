@@ -18,7 +18,9 @@ export interface DisputeInput {
 }
 
 export const useDisputesStore = defineStore('disputes', {
-  state: (): State => ({ disputes: initialMockDisputes() }),
+  state: (): State => ({
+    disputes: initialMockDisputes(),
+  }),
 
   getters: {
     forJob: (state) => (jobId: string): Dispute[] => state.disputes.filter((d) => d.jobId === jobId),

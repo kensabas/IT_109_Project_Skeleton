@@ -19,7 +19,9 @@ interface State { requests: ClientRequest[] }
 const NOT_YOURS = 'You can only change your own requests.'
 
 export const useRequestsStore = defineStore('requests', {
-  state: (): State => ({ requests: initialMockRequests() }),
+  state: (): State => ({
+    requests: initialMockRequests(),
+  }),
 
   getters: {
     forClient: (state) => (email: string): ClientRequest[] =>

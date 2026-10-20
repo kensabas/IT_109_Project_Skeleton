@@ -28,7 +28,9 @@ export function canCleanerApply(cleaner: MockUser | null): string | null {
 }
 
 export const useApplicationsStore = defineStore('applications', {
-  state: (): State => ({ applications: initialMockApplications() }),
+  state: (): State => ({
+    applications: initialMockApplications(),
+  }),
 
   getters: {
     forCleaner: (state) => (email: string): Application[] =>

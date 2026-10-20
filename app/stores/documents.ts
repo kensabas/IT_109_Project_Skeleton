@@ -16,7 +16,9 @@ function missingDocument(cleanerEmail: string, type: DocumentType): CleanerDocum
 }
 
 export const useDocumentsStore = defineStore('documents', {
-  state: (): State => ({ documents: initialMockDocuments() }),
+  state: (): State => ({
+    documents: initialMockDocuments(),
+  }),
 
   actions: {
     // Always the six documents, in the order the user listed them.
