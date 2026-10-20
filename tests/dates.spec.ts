@@ -51,3 +51,11 @@ describe('isoToday', () => {
     expect(isoToday(new Date(2026, 9, 20, 9, 0))).toBe('2026-10-20')
   })
 })
+
+import { hoursBetween } from '../app/utils/dates'
+describe('hoursBetween', () => {
+  it('works out whole and half hours', () => {
+    expect(hoursBetween('09:00', '12:30')).toBe(3.5)
+    expect(hoursBetween('08:00', '14:00')).toBe(6)
+  })
+})

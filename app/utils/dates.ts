@@ -55,3 +55,12 @@ export function eventsInMonth<E extends { date: string; time?: string }>(events:
 export function isoToday(now: Date = new Date()): string {
   return toIsoDate(now.getFullYear(), now.getMonth(), now.getDate())
 }
+
+// Hours between two "HH:MM" times on the same day (end after start).
+export function hoursBetween(startTime: string, endTime: string): number {
+  const toMinutes = (time: string) => {
+    const [hours, minutes] = time.split(':').map((part) => parseInt(part, 10))
+    return hours * 60 + minutes
+  }
+  return (toMinutes(endTime) - toMinutes(startTime)) / 60
+}
