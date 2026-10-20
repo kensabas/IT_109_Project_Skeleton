@@ -7,6 +7,9 @@
 //
 // Names and emails below are made-up, Filipino-style; they do not refer to
 // real people. All emails use the IANA-reserved `example.com` domain.
+// Wave 2.1 seed: 3 clients, 5 cleaners (approved / pending / rejected;
+// activated / deactivated / suspended), 2 admins. Place names are real
+// Philippine places; coordinates are approximate, for the demo only.
 //
 // clientType is carried only for clients. The sign-up form collects it
 // (Phase 3 /register/client page), so the mock list needs the field too;
@@ -41,10 +44,20 @@ export interface MockUser {
   approvalStatus: ApprovalStatus
   // Only the main admin can create admin accounts (F-04).
   isMainAdmin?: boolean
+  // ISO date the account was created (report: new registrations).
+  registeredAt: string
+  // Cleaner's pinned location for distance (F-24, plan D5). Null until pinned.
+  pinnedLocation?: PinnedLocation | null
+}
+
+export interface PinnedLocation {
+  lat: number
+  lng: number
+  label: string
 }
 
 // What a sign-up form provides; the store fills in the rest.
-export type NewUserInput = Omit<MockUser, 'accountState' | 'approvalStatus'>
+export type NewUserInput = Omit<MockUser, 'accountState' | 'approvalStatus' | 'registeredAt'>
 
 export function initialMockUsers(): MockUser[] {
   // Returned fresh each call so the Pinia store can start from a clean
@@ -61,6 +74,7 @@ export function initialMockUsers(): MockUser[] {
       accountState: 'activated',
       approvalStatus: 'not-required',
       clientType: 'homeowner',
+      registeredAt: '2026-05-12',
     },
     {
       name: 'Jose Dela Cruz',
@@ -71,6 +85,7 @@ export function initialMockUsers(): MockUser[] {
       accountState: 'activated',
       approvalStatus: 'not-required',
       clientType: 'company',
+      registeredAt: '2026-07-03',
     },
     {
       name: 'Juan Reyes',
@@ -81,6 +96,7 @@ export function initialMockUsers(): MockUser[] {
       accountState: 'activated',
       approvalStatus: 'not-required',
       clientType: 'business',
+      registeredAt: '2026-09-18',
     },
 
     // --- Admins (placeholders, Q22 unconfirmed) ---
@@ -93,6 +109,7 @@ export function initialMockUsers(): MockUser[] {
       accountState: 'activated',
       approvalStatus: 'not-required',
       isMainAdmin: true,
+      registeredAt: '2026-01-05',
     },
     {
       name: 'Ramon Castillo',
@@ -103,6 +120,7 @@ export function initialMockUsers(): MockUser[] {
       accountState: 'activated',
       approvalStatus: 'not-required',
       isMainAdmin: false,
+      registeredAt: '2026-01-05',
     },
 
     // --- Cleaners ---
@@ -114,6 +132,8 @@ export function initialMockUsers(): MockUser[] {
       role: 'cleaner',
       accountState: 'activated',
       approvalStatus: 'approved',
+      registeredAt: '2026-06-01',
+      pinnedLocation: { lat: 14.565, lng: 121.031, label: 'Poblacion, Makati City' },
     },
     {
       name: 'Pedro Mendoza',
@@ -123,6 +143,8 @@ export function initialMockUsers(): MockUser[] {
       role: 'cleaner',
       accountState: 'activated',
       approvalStatus: 'approved',
+      registeredAt: '2026-06-20',
+      pinnedLocation: { lat: 14.6537, lng: 121.0687, label: 'Diliman, Quezon City' },
     },
     {
       name: 'Ana Villanueva',
@@ -130,8 +152,32 @@ export function initialMockUsers(): MockUser[] {
       mobileNumber: '09226789012',
       password: 'TidyPro123',
       role: 'cleaner',
-      accountState: 'activated',
+      accountState: 'deactivated',
       approvalStatus: 'approved',
+      registeredAt: '2026-07-15',
+      pinnedLocation: { lat: 10.3316, lng: 123.8996, label: 'Lahug, Cebu City' },
+    },
+    {
+      name: 'Liza Fernandez',
+      email: 'liza.fernandez@example.com',
+      mobileNumber: '09237890123',
+      password: 'Sparkle2026',
+      role: 'cleaner',
+      accountState: 'activated',
+      approvalStatus: 'pending',
+      registeredAt: '2026-10-14',
+      pinnedLocation: { lat: 14.5712, lng: 121.0597, label: 'Kapitolyo, Pasig City' },
+    },
+    {
+      name: 'Carlo Ramos',
+      email: 'carlo.ramos@example.com',
+      mobileNumber: '09248901234',
+      password: 'Mopping2026',
+      role: 'cleaner',
+      accountState: 'suspended',
+      approvalStatus: 'rejected',
+      registeredAt: '2026-08-20',
+      pinnedLocation: { lat: 8.948, lng: 125.527, label: 'Libertad, Butuan City' },
     },
   ]
 }

@@ -7,9 +7,10 @@ import { JOB_STATUSES } from '../app/data/mockJobs'
 describe('jobs store — load + getById', () => {
   beforeEach(() => setActivePinia(createPinia()))
 
-  it('starts with the six mock jobs', () => {
+  // Wave 2.1 changed the seed from six to ten posts (plan 2.1).
+  it('starts with the ten mock jobs', () => {
     const s = useJobsStore()
-    expect(s.jobs.length).toBe(6)
+    expect(s.jobs.length).toBe(10)
   })
 
   it('getById returns the right job', () => {
@@ -31,14 +32,14 @@ describe('jobs store — visibleJobs(showArchived)', () => {
   it('hides archived jobs by default (showArchived=false)', () => {
     const s = useJobsStore()
     const visible = s.visibleJobs(false)
-    expect(visible.length).toBe(5)
+    expect(visible.length).toBe(9)
     expect(visible.every((j) => j.archivedAt === null)).toBe(true)
   })
 
   it('includes archived when showArchived=true', () => {
     const s = useJobsStore()
     const visible = s.visibleJobs(true)
-    expect(visible.length).toBe(6)
+    expect(visible.length).toBe(10)
     expect(visible.some((j) => j.archivedAt !== null)).toBe(true)
   })
 })

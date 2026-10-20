@@ -14,6 +14,7 @@
 // (outside the Nuxt runtime where defineStore would be auto-imported).
 
 import { defineStore } from 'pinia'
+import { isoToday } from '../utils/dates'
 import { initialMockUsers, type MockUser, type NewUserInput } from '../data/mockUsers'
 
 interface State {
@@ -89,6 +90,8 @@ export const useCurrentUserStore = defineStore('currentUser', {
         ...input,
         accountState: 'activated',
         approvalStatus: input.role === 'cleaner' ? 'pending' : 'not-required',
+        registeredAt: isoToday(),
+        pinnedLocation: input.role === 'cleaner' ? null : undefined,
       }
       const needle = normalizeEmail(newUser.email)
       const already = this.users.some(

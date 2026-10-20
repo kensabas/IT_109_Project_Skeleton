@@ -18,7 +18,7 @@ export const SESSION_KEY = `${STORAGE_PREFIX}session`
 export const SCHEMA_KEY = `${STORAGE_PREFIX}schema`
 // Bump when the seed data or a stored shape changes, so browsers drop
 // data saved by an older build instead of showing broken pages.
-export const SCHEMA_VERSION = 2
+export const SCHEMA_VERSION = 3
 
 const CURRENT_USER_STORE_ID = 'currentUser'
 
