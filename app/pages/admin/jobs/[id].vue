@@ -144,13 +144,10 @@ function doArchive() {
       </p>
 
       <!-- Not-found branch -->
-      <section v-if="!job" class="detail-page__notfound">
+      <template v-if="!job">
         <h1 class="detail-page__title">Job not found</h1>
-        <p>No job post has the id <code>{{ jobId }}</code>.</p>
-        <p>
-          <NuxtLink to="/admin/jobs" class="detail-page__link">Go back to the list</NuxtLink>
-        </p>
-      </section>
+        <p class="card">No job post has the id <code>{{ jobId }}</code>.</p>
+      </template>
 
       <!-- Normal branch -->
       <template v-else>
@@ -159,21 +156,16 @@ function doArchive() {
             <h1 class="detail-page__title">{{ job.title }}</h1>
             <StatusChip :status="job.status" />
           </div>
-          <BaseButton
-            v-if="!job.archivedAt"
-            type="button"
-            class="detail-page__archive"
-            @click="openConfirm"
-          >
+          <button v-if="!job.archivedAt" type="button" class="btn btn--secondary" @click="openConfirm">
             Archive job
-          </BaseButton>
+          </button>
           <div v-else class="detail-page__archived">
             <p class="detail-page__archived-note">
               This job was archived on {{ fullDate(job.archivedAt.slice(0, 10)) }}.
             </p>
-            <BaseButton type="button" class="detail-page__archive" @click="doRestore">
+            <button type="button" class="btn btn--primary" @click="doRestore">
               Restore job
-            </BaseButton>
+            </button>
           </div>
         </div>
 
@@ -365,7 +357,6 @@ function doArchive() {
   flex-direction: column;
   gap: 18px;
 }
-.detail-page__back { margin: 0; }
 .detail-page__back-link,
 .detail-page__link {
   /* Tap target at least 24 px tall (I-25). */
@@ -389,7 +380,6 @@ function doArchive() {
 }
 .detail-page__title-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .detail-page__title { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.02em; color: var(--color-text); }
-.detail-page__archive { width: auto; min-width: 160px; }
 .detail-page__archived { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .detail-page__message { margin: 0; font-size: 14px; color: var(--color-text); }
 .detail-page__archived-note { margin: 0; font-size: 14px; color: var(--color-text-soft); font-style: italic; }
@@ -522,11 +512,4 @@ function doArchive() {
 .applicants { display: flex; flex-direction: column; gap: 12px; }
 .applicants__title { margin: 0; font-size: 18px; font-weight: 800; color: var(--color-text); }
 
-.detail-page__notfound {
-  background-color: var(--color-card);
-  border: 1px solid var(--color-card-border);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card-lg);
-  padding: 24px;
-}
 </style>
