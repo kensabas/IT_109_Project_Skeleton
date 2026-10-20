@@ -105,7 +105,7 @@ function describedBy(field: RequestField, hintId?: string): string | undefined {
       v-model="pin"
       label="Pin location on the map"
       optional
-      hint="Helps cleaners see how far the job is. Until the map is added, choose the nearest city."
+      hint="Helps cleaners see how far the job is. Click the map or choose the nearest city."
     />
 
     <div class="field">
