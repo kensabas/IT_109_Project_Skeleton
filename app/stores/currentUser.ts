@@ -38,6 +38,9 @@ const INVALID_CREDENTIALS_MESSAGE = 'Email or password is incorrect.'
 // the list. Phase 4.4.1.
 const DUPLICATE_EMAIL_MESSAGE = 'An account with this email already exists.'
 
+// Plan D6 (Q12 unconfirmed): a suspended account cannot sign in.
+const SUSPENDED_MESSAGE = 'This account is suspended. Please contact the CleanLinis admin.'
+
 // F-04: admins have no registration; only the main admin creates them.
 const NO_ADMIN_SIGN_UP_MESSAGE = 'Admin accounts are created by the main admin in the admin panel.'
 
@@ -65,6 +68,9 @@ export const useCurrentUserStore = defineStore('currentUser', {
       )
       if (!match) {
         return { ok: false, error: INVALID_CREDENTIALS_MESSAGE }
+      }
+      if (match.accountState === 'suspended') {
+        return { ok: false, error: SUSPENDED_MESSAGE }
       }
       this.currentUser = match
       return { ok: true }
