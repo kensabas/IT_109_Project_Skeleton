@@ -41,3 +41,60 @@ await browser.close()
   console.log(JSON.stringify(['admin jobs sort', firstBefore, ariaAfter, firstAfter, ariaAfter2, rowsNoArchived, rowsWithArchived, errs.length]))
   await browser2.close()
 }
+
+// Wave 1.4 — deactivated users see only the notice; suspended users are signed out.
+{
+  const browser3 = await chromium.launch()
+  const c = await browser3.newContext(); const p = await c.newPage()
+  await p.goto(B + '/login'); await p.fill('#login-email', 'rosa.garcia@example.com'); await p.fill('#login-password', 'CleanBest2024'); await p.click('button[type=submit]'); await p.waitForURL('**/cleaner/marketplace')
+  const setState = (state) => p.evaluate((s) => {
+    const saved = JSON.parse(localStorage.getItem('cleanlinis:currentUser'))
+    saved.users.find((u) => u.email === 'rosa.garcia@example.com').accountState = s
+    localStorage.setItem('cleanlinis:currentUser', JSON.stringify(saved))
+  }, state)
+  await setState('deactivated'); await p.goto(B + '/cleaner/marketplace'); await p.waitForURL('**/account-notice')
+  console.log(JSON.stringify(['deactivated user', new URL(p.url()).pathname, await p.textContent('h1')]))
+  await setState('suspended'); await p.goto(B + '/cleaner/marketplace'); await p.waitForURL('**/login')
+  console.log(JSON.stringify(['suspended user with session', new URL(p.url()).pathname, await p.evaluate(() => localStorage.getItem('cleanlinis:session'))]))
+  await p.fill('#login-email', 'rosa.garcia@example.com'); await p.fill('#login-password', 'CleanBest2024'); await p.click('button[type=submit]')
+  await p.waitForSelector('.login-form__error')
+  console.log(JSON.stringify(['suspended login', await p.textContent('.login-form__error')]))
+  await browser3.close()
+}
+
+// Wave 3 — client: validation + focus, create, edit, cancel, calendar.
+{
+  const b = await chromium.launch()
+  const c = await b.newContext(); const p = await c.newPage(); const errs = []
+  p.on('console', (m) => { if (['error', 'warning'].includes(m.type())) errs.push(m.text()) })
+  p.on('pageerror', (e) => errs.push(e.message))
+  await p.goto(B + '/login'); await p.fill('#login-email', 'maria.santos@example.com'); await p.fill('#login-password', 'StrongPass123'); await p.click('button[type=submit]'); await p.waitForURL('**/client/requests')
+  const before = await p.locator('tbody tr').count()
+  await p.click('text=New request'); await p.waitForURL('**/client/requests/new')
+  const current = await p.getAttribute('a[aria-current=page]', 'href')
+  await p.click('button:has-text("Send request")')
+  const focused = await p.evaluate(() => document.activeElement?.id)
+  const errorCount = await p.locator('.field__error, .text-field__error').count()
+  await p.fill('#request-title', 'Garage clean'); await p.fill('#request-description', 'Sweep and organise the garage.')
+  await p.fill('#request-date', '2026-12-05'); await p.fill('#request-start', '08:00'); await p.fill('#request-end', '10:30')
+  const duration = await p.textContent('#request-duration strong')
+  await p.fill('#request-barangay', 'Kapitolyo'); await p.fill('#request-city', 'Pasig City'); await p.selectOption('#request-pin', 'Pasig City'); await p.fill('#request-rate', '450')
+  await p.click('button:has-text("Send request")'); await p.waitForURL(/created=1/)
+  const after = await p.locator('tbody tr').count()
+  console.log(JSON.stringify(['client new request', current, focused, errorCount, duration, before, after]))
+  await p.click('a:has-text("Garage clean")'); await p.waitForURL(/req-\d+/)
+  await p.click('text=Edit request'); await p.fill('#request-rate', '500'); await p.click('button:has-text("Save changes")')
+  const saved = await p.textContent('.message'); const rate = await p.textContent('.info-list__row:has(dt:has-text("Proposed rate")) dd')
+  await p.click('button:has-text("Cancel request")')
+  const dialogFocused = await p.evaluate(() => document.activeElement?.getAttribute('role'))
+  await p.click('button:has-text("Yes, cancel request")')
+  const status = await p.textContent('.status-badge')
+  console.log(JSON.stringify(['client edit + cancel', saved?.trim(), rate?.trim(), dialogFocused, status?.trim()]))
+  await p.goto(B + '/client/requests/req-001'); await p.click('button:has-text("Cancel request")'); await p.click('button:has-text("Yes, cancel request")')
+  console.log(JSON.stringify(['client cancel blocked (cleaner assigned)', (await p.textContent('.message'))?.trim()]))
+  await p.goto(B + '/client/calendar'); await p.waitForSelector('#calendar-title')
+  const month = await p.textContent('#calendar-title'); const listItems = await p.locator('.calendar__list-item').count()
+  await p.click('button:has-text("Next month")'); const next = await p.textContent('#calendar-title'); const nextItems = await p.locator('.calendar__list-item').count()
+  console.log(JSON.stringify(['client calendar', month, listItems, next, nextItems, errs.length, errs.slice(0, 3)]))
+  await b.close()
+}
