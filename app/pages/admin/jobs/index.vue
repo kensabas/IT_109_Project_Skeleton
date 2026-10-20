@@ -37,9 +37,9 @@ const columns: TableColumn<Job>[] = [
 
 <template>
   <div class="page-stack">
-    <PageHeader title="Job posts" subtitle="All job posts published from approved client requests." />
+    <PageHeader title="Job posts" subtitle="Every job post, including those made from approved client requests." />
 
-    <label class="jobs-filter">
+    <label class="inline-check">
       <input v-model="showArchived" type="checkbox" />
       <span>Show archived</span>
     </label>
@@ -70,16 +70,6 @@ const columns: TableColumn<Job>[] = [
 </template>
 
 <style scoped>
-.jobs-filter {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: var(--color-text);
-  cursor: pointer;
-  width: fit-content;
-}
-.jobs-filter input { width: 18px; height: 18px; accent-color: var(--color-teal); }
 .jobs-archived {
   margin-left: 8px;
   font-size: 12px;
