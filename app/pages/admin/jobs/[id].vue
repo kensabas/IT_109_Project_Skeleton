@@ -222,7 +222,11 @@ function doArchive() {
                       {{ ACCOUNT_STATE_LABEL[cleanerFor(job)!.accountState] }}
                     </span>
                   </p>
-                  <p class="cleaner__mobile">{{ cleanerFor(job)!.mobileNumber }}</p>
+                  <p class="cleaner__mobile">
+                    <a :href="`tel:${cleanerFor(job)!.mobileNumber}`" class="detail-page__link">
+                      {{ cleanerFor(job)!.mobileNumber }}
+                    </a>
+                  </p>
                   <p class="cleaner__profile">
                     <!-- Placeholder — needs_your_attention #5 -->
                     <NuxtLink to="#" data-placeholder="cleaner-profile" class="detail-page__link">
