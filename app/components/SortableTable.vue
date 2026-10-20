@@ -166,6 +166,9 @@ function display(value: unknown): string {
   transition: background-color 120ms ease;
 }
 .sortable__table tbody tr:last-child td { border-bottom: none; }
+/* The first column usually names the row (job, request, person); keep it
+ * readable on phones instead of a few words per line (I-33). */
+.sortable__table tbody td:first-child { min-width: 170px; }
 .sortable__table tbody tr:nth-child(even) td { background-color: var(--color-row-stripe); }
 .sortable__table tbody tr:hover td,
 .sortable__table tbody tr:focus-within td { background-color: var(--color-row-hover); }
