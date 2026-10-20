@@ -15,7 +15,9 @@
     "b2audit": "node scripts/b2audit.mjs",
     "keys": "node scripts/keys.mjs",
     "aria": "node scripts/aria.mjs",
-    "mobile": "node scripts/mobile.mjs"
+    "mobile": "node scripts/mobile.mjs",
+    "print-check": "node scripts/print-check.mjs",
+    "checklist": "node scripts/checklist.mjs"
   },
   "dependencies": {
     "@pinia/nuxt": "^1.0.3",
