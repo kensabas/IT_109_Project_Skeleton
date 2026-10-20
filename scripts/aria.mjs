@@ -6,12 +6,16 @@
 // badges with text, dialog role and label, live-region roles on messages.
 // Needs `npm run dev`. VoiceOver / NVDA themselves cannot be automated.
 import { mkdirSync, writeFileSync } from 'node:fs'
-import { chromium } from 'playwright'
+import { chromium, firefox, webkit } from 'playwright'
+// Engine: BROWSER=chromium (default) | firefox | webkit.
+const ENGINE_NAME = process.env.BROWSER ?? 'chromium'
+const engine = { chromium, firefox, webkit }[ENGINE_NAME]
 import { ROUTES } from './routes.mjs'
 import { signInAs } from './session.mjs'
 
 const BASE_URL = process.argv[2] ?? 'http://localhost:3000'
-mkdirSync('CLAUDE/screenshots/aria', { recursive: true })
+const OUT = ENGINE_NAME === 'chromium' ? 'CLAUDE/screenshots/aria' : `CLAUDE/screenshots/aria-${ENGINE_NAME}`
+mkdirSync(OUT, { recursive: true })
 
 function checks(signedIn) {
   const problems = []
@@ -66,7 +70,7 @@ function checks(signedIn) {
   return problems
 }
 
-const browser = await chromium.launch()
+const browser = await engine.launch()
 let total = 0
 const report = []
 for (const route of ROUTES) {
@@ -75,14 +79,14 @@ for (const route of ROUTES) {
   const page = await context.newPage()
   await page.goto(BASE_URL + route.path, { waitUntil: 'networkidle' })
   const snapshot = await page.locator('body').ariaSnapshot()
-  writeFileSync(`CLAUDE/screenshots/aria/${route.name}.yml`, snapshot)
+  writeFileSync(`${OUT}/${route.name}.yml`, snapshot)
   const problems = await page.evaluate(checks, !!route.role)
   // Open one confirm dialog (Reset demo data) and check it as well.
   if (route.role) {
     await page.click('button:has-text("Reset demo data")')
     const dialogProblems = await page.evaluate(checks, true)
     const dialog = await page.locator('[role=alertdialog]').ariaSnapshot()
-    writeFileSync(`CLAUDE/screenshots/aria/${route.name}--reset-dialog.yml`, dialog)
+    writeFileSync(`${OUT}/${route.name}--reset-dialog.yml`, dialog)
     for (const p of dialogProblems) if (!problems.includes(p)) problems.push(`(dialog open) ${p}`)
   }
   total += problems.length
@@ -92,5 +96,5 @@ for (const route of ROUTES) {
   await context.close()
 }
 await browser.close()
-writeFileSync('CLAUDE/screenshots/aria/report.json', JSON.stringify(report, null, 2))
-console.log(`TOTAL aria problems: ${total}`)
+writeFileSync(`${OUT}/report.json`, JSON.stringify(report, null, 2))
+console.log(`TOTAL aria problems (${ENGINE_NAME}): ${total}`)

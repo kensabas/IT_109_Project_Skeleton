@@ -9,7 +9,7 @@
 //  - inputs, selects and textareas use a font size of at least 16 px, so
 //    iOS does not zoom in when they get focus
 import { mkdirSync, writeFileSync } from 'node:fs'
-import { chromium, webkit, devices } from 'playwright'
+import { chromium, firefox, webkit, devices } from 'playwright'
 import { ROUTES } from './routes.mjs'
 import { signInAs } from './session.mjs'
 
@@ -18,6 +18,8 @@ const DEVICES = [
   { name: 'iPhone 13', engine: webkit, options: devices['iPhone 13'] },
   { name: 'Pixel 7', engine: chromium, options: devices['Pixel 7'] },
   { name: '375x667 touch', engine: chromium, options: { viewport: { width: 375, height: 667 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 } },
+  // Playwright does not support isMobile in Firefox; touch and width are emulated.
+  { name: 'Firefox 375x667 touch', engine: firefox, options: { viewport: { width: 375, height: 667 }, hasTouch: true } },
 ]
 const MIN_TARGET = 24
 const COMFORT_TARGET = 44
