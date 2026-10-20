@@ -106,3 +106,26 @@ describe('jobs store — setStatus', () => {
     expect(result.ok).toBe(false)
   })
 })
+
+describe('jobs store — restoreJob (Wave 0.7, plan D3)', () => {
+  beforeEach(() => setActivePinia(createPinia()))
+
+  it('clears archivedAt on an archived job', () => {
+    const s = useJobsStore()
+    expect(s.getById('job-006')?.archivedAt).not.toBeNull()
+    const result = s.restoreJob('job-006')
+    expect(result.ok).toBe(true)
+    expect(s.getById('job-006')?.archivedAt).toBeNull()
+  })
+
+  it('reports an error when the job is not archived', () => {
+    const s = useJobsStore()
+    const result = s.restoreJob('job-001')
+    expect(result.ok).toBe(false)
+  })
+
+  it('reports not-found for an unknown id', () => {
+    const s = useJobsStore()
+    expect(s.restoreJob('job-404').ok).toBe(false)
+  })
+})
