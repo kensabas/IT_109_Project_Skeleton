@@ -14,7 +14,7 @@
 // (outside the Nuxt runtime where defineStore would be auto-imported).
 
 import { defineStore } from 'pinia'
-import { initialMockUsers, type MockUser } from '../data/mockUsers'
+import { initialMockUsers, type MockUser, type NewUserInput } from '../data/mockUsers'
 
 interface State {
   currentUser: MockUser | null
@@ -70,7 +70,14 @@ export const useCurrentUserStore = defineStore('currentUser', {
     // Appends the new user to the in-memory list and signs them in.
     // Blocks the sign-up if the email is already in the list (4.4.1,
     // case-insensitive; unconfirmed choice, see Phase 4 run-status).
-    signUp(newUser: MockUser): AuthResult {
+    // New accounts start activated; cleaners also start pending
+    // approval (F-03: cannot apply before approval).
+    signUp(input: NewUserInput): AuthResult {
+      const newUser: MockUser = {
+        ...input,
+        accountState: 'activated',
+        approvalStatus: input.role === 'cleaner' ? 'pending' : 'not-required',
+      }
       const needle = normalizeEmail(newUser.email)
       const already = this.users.some(
         (u) => normalizeEmail(u.email) === needle,

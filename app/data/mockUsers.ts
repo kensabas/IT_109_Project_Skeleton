@@ -16,6 +16,16 @@
 export type UserRole = 'client' | 'cleaner'
 export type ClientType = 'homeowner' | 'company' | 'establishment' | 'business'
 
+// Wave 0.3 [F-05] — the three account states stated by the user.
+// Meaning of each is unconfirmed (Q12, plan D6).
+export const ACCOUNT_STATES = ['activated', 'deactivated', 'suspended'] as const
+export type AccountState = (typeof ACCOUNT_STATES)[number]
+
+// Wave 0.3 [F-03] — only cleaners need approval; everyone else is
+// 'not-required' so the field is never empty.
+export const APPROVAL_STATUSES = ['approved', 'pending', 'rejected', 'not-required'] as const
+export type ApprovalStatus = (typeof APPROVAL_STATUSES)[number]
+
 export interface MockUser {
   name: string
   email: string
@@ -24,7 +34,12 @@ export interface MockUser {
   role: UserRole
   // Required when role === 'client', absent when role === 'cleaner'.
   clientType?: ClientType
+  accountState: AccountState
+  approvalStatus: ApprovalStatus
 }
+
+// What a sign-up form provides; the store fills in the rest.
+export type NewUserInput = Omit<MockUser, 'accountState' | 'approvalStatus'>
 
 export function initialMockUsers(): MockUser[] {
   // Returned fresh each call so the Pinia store can start from a clean
@@ -38,6 +53,8 @@ export function initialMockUsers(): MockUser[] {
       mobileNumber: '09171234567',
       password: 'StrongPass123',
       role: 'client',
+      accountState: 'activated',
+      approvalStatus: 'not-required',
       clientType: 'homeowner',
     },
     {
@@ -46,6 +63,8 @@ export function initialMockUsers(): MockUser[] {
       mobileNumber: '09182345678',
       password: 'Secure4567A',
       role: 'client',
+      accountState: 'activated',
+      approvalStatus: 'not-required',
       clientType: 'company',
     },
     {
@@ -54,6 +73,8 @@ export function initialMockUsers(): MockUser[] {
       mobileNumber: '09193456789',
       password: 'Password2024',
       role: 'client',
+      accountState: 'activated',
+      approvalStatus: 'not-required',
       clientType: 'business',
     },
 
@@ -64,6 +85,8 @@ export function initialMockUsers(): MockUser[] {
       mobileNumber: '09204567890',
       password: 'CleanBest2024',
       role: 'cleaner',
+      accountState: 'activated',
+      approvalStatus: 'approved',
     },
     {
       name: 'Pedro Mendoza',
@@ -71,6 +94,8 @@ export function initialMockUsers(): MockUser[] {
       mobileNumber: '09215678901',
       password: 'WorkHard88',
       role: 'cleaner',
+      accountState: 'activated',
+      approvalStatus: 'approved',
     },
     {
       name: 'Ana Villanueva',
@@ -78,6 +103,8 @@ export function initialMockUsers(): MockUser[] {
       mobileNumber: '09226789012',
       password: 'TidyPro123',
       role: 'cleaner',
+      accountState: 'activated',
+      approvalStatus: 'approved',
     },
   ]
 }
