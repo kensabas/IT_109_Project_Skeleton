@@ -11,6 +11,7 @@ import { nextTick, ref } from 'vue'
 import { useCurrentUserStore } from '~/stores/currentUser'
 import { homeFor } from '~/utils/access'
 import type { ClientType } from '~/data/mockUsers'
+import { CLIENT_TYPE_LABEL } from '~/utils/labels'
 import {
   validateClientSignUp,
   hasErrors,
@@ -27,12 +28,7 @@ const password = ref('')
 const confirmPassword = ref('')
 const fieldErrors = ref<FieldErrors<ClientSignUpField>>({})
 
-const clientTypeOptions = [
-  { value: 'homeowner', label: 'Homeowner' },
-  { value: 'company', label: 'Company' },
-  { value: 'establishment', label: 'Establishment' },
-  { value: 'business', label: 'Business' },
-]
+const clientTypeOptions = Object.entries(CLIENT_TYPE_LABEL).map(([value, label]) => ({ value, label }))
 
 // 5.5.2 — display order + name-to-id map.
 const CLIENT_ORDER: readonly ClientSignUpField[] = [

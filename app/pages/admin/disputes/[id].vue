@@ -7,6 +7,7 @@ import { useCurrentUserStore } from '~/stores/currentUser'
 import { useDisputesStore } from '~/stores/disputes'
 import { useJobsStore } from '~/stores/jobs'
 import { formatDateShort, formatDateTime } from '~/utils/format'
+import { DISPUTE_PARTY_LABEL } from '~/utils/labels'
 
 definePageMeta({ layout: 'app' })
 
@@ -63,7 +64,7 @@ function resolve() {
         <section class="card">
           <h2 class="card__title">Details</h2>
           <dl class="info-list">
-            <div class="info-list__row"><dt>Raised by</dt><dd>{{ dispute.raisedByName }} ({{ dispute.raisedByRole }})</dd></div>
+            <div class="info-list__row"><dt>Raised by</dt><dd>{{ dispute.raisedByName }} ({{ DISPUTE_PARTY_LABEL[dispute.raisedByRole] }})</dd></div>
             <div class="info-list__row"><dt>Opened</dt><dd>{{ formatDateTime(dispute.openedAt) }}</dd></div>
             <div class="info-list__row"><dt>Resolved</dt><dd>{{ dispute.resolvedAt ? formatDateTime(dispute.resolvedAt) : 'Not yet' }}</dd></div>
           </dl>

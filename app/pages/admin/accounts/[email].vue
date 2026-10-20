@@ -12,7 +12,7 @@ import { useJobsStore } from '~/stores/jobs'
 import type { AccountState } from '~/data/mockUsers'
 import { DOCUMENT_TYPE_LABEL, type CleanerDocument, type DocumentType } from '~/data/mockDocuments'
 import type { TableColumn } from '~/components/SortableTable.vue'
-import { ACCOUNT_STATE_LABEL, stateChangeOptions } from '~/utils/labels'
+import { ACCOUNT_STATE_LABEL, CLIENT_TYPE_LABEL, stateChangeOptions } from '~/utils/labels'
 import { roleLabel } from '~/utils/navigation'
 import { formatDateShort, formatDateTime } from '~/utils/format'
 import { formatFileSize } from '~/utils/documents'
@@ -99,7 +99,7 @@ const docColumns: TableColumn<CleanerDocument>[] = [
             <div class="info-list__row"><dt>Email</dt><dd><a :href="`mailto:${user.email}`" class="link">{{ user.email }}</a></dd></div>
             <div class="info-list__row"><dt>Mobile</dt><dd><a :href="`tel:${user.mobileNumber}`" class="link">{{ user.mobileNumber }}</a></dd></div>
             <div class="info-list__row"><dt>Role</dt><dd>{{ roleLabel(user.role, !!user.isMainAdmin) }}</dd></div>
-            <div v-if="user.clientType" class="info-list__row"><dt>Client type</dt><dd>{{ user.clientType }}</dd></div>
+            <div v-if="user.clientType" class="info-list__row"><dt>Client type</dt><dd>{{ CLIENT_TYPE_LABEL[user.clientType] }}</dd></div>
             <div class="info-list__row"><dt>Joined</dt><dd>{{ formatDateShort(user.registeredAt) }}</dd></div>
             <div v-if="user.role === 'cleaner'" class="info-list__row"><dt>Pinned location</dt><dd>{{ user.pinnedLocation?.label ?? 'Not pinned' }}</dd></div>
           </dl>

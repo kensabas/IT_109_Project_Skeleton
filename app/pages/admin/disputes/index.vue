@@ -11,6 +11,7 @@ import { useJobsStore } from '~/stores/jobs'
 import type { Dispute, DisputeParty } from '~/data/mockDisputes'
 import type { TableColumn } from '~/components/SortableTable.vue'
 import { formatDateTime } from '~/utils/format'
+import { DISPUTE_PARTY_LABEL } from '~/utils/labels'
 
 definePageMeta({ layout: 'app' })
 
@@ -35,7 +36,6 @@ const form = ref({ jobId: preselected, title: '', description: '', raisedByRole:
 const formError = ref('')
 const created = ref<string | null>(null)
 
-const PARTY_LABEL: Record<DisputeParty, string> = { client: 'Client', cleaner: 'Cleaner', admin: 'Admin' }
 
 async function onSubmit() {
   formError.value = ''
@@ -89,7 +89,7 @@ async function onSubmit() {
         <div class="field">
           <label for="dispute-party" class="field__label">Raised by</label>
           <select id="dispute-party" v-model="form.raisedByRole" class="field__input">
-            <option v-for="(label, value) in PARTY_LABEL" :key="value" :value="value">{{ label }}</option>
+            <option v-for="(label, value) in DISPUTE_PARTY_LABEL" :key="value" :value="value">{{ label }}</option>
           </select>
         </div>
         <TextField id="dispute-party-name" v-model="form.raisedByName" label="Their name" required />
@@ -107,7 +107,7 @@ async function onSubmit() {
     >
       <template #cell-title="{ row }"><NuxtLink :to="`/admin/disputes/${row.id}`" class="link">{{ row.title }}</NuxtLink></template>
       <template #cell-job="{ row }"><NuxtLink :to="`/admin/jobs/${row.jobId}`" class="link">{{ jobTitle(row.jobId) }}</NuxtLink></template>
-      <template #cell-raisedBy="{ row }">{{ row.raisedByName }} ({{ PARTY_LABEL[row.raisedByRole] }})</template>
+      <template #cell-raisedBy="{ row }">{{ row.raisedByName }} ({{ DISPUTE_PARTY_LABEL[row.raisedByRole] }})</template>
       <template #cell-opened="{ row }">{{ formatDateTime(row.openedAt) }}</template>
       <template #cell-status="{ row }"><StatusBadge kind="dispute" :value="row.status" /></template>
     </SortableTable>

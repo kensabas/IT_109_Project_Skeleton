@@ -79,3 +79,13 @@ describe('stateChangeOptions — buttons offered for an account (Wave 4.3)', () 
     expect(stateChangeOptions('suspended').map((o) => o.action)).toEqual(['Activate', 'Deactivate'])
   })
 })
+
+import { CLIENT_TYPE_LABEL, DISPUTE_PARTY_LABEL } from '../app/utils/labels'
+describe('shared labels for client types and dispute parties (I-32)', () => {
+  it('every client type and party has a capitalised label', () => {
+    for (const type of ['homeowner', 'company', 'establishment', 'business'] as const) expect(CLIENT_TYPE_LABEL[type]).toMatch(/^[A-Z]/)
+    for (const party of ['client', 'cleaner', 'admin'] as const) expect(DISPUTE_PARTY_LABEL[party]).toMatch(/^[A-Z]/)
+    expect(CLIENT_TYPE_LABEL.homeowner).toBe('Homeowner')
+    expect(DISPUTE_PARTY_LABEL.client).toBe('Client')
+  })
+})
