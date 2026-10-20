@@ -4,7 +4,7 @@
 -->
 <script setup lang="ts">
 import { computed } from 'vue'
-import { niceMax, summarise, type Point } from '~/utils/chartScale'
+import { axisLabelIndexes, niceMax, summarise, type Point } from '~/utils/chartScale'
 
 const props = defineProps<{ title: string; points: Point[]; unit: string; labelHeader?: string }>()
 
@@ -20,10 +20,10 @@ const y = (v: number) => PAD.top + plotH - (v / max.value) * plotH
 const path = computed(() => props.points.map((p, i) => `${x(i)},${y(p.value)}`).join(' '))
 // Counts are whole numbers, so only whole-number ticks are drawn.
 const ticks = computed(() => (Number.isInteger(max.value / 2) ? [0, max.value / 2, max.value] : [0, max.value]))
-// Label every nth point so axis labels never collide.
-const labelEvery = computed(() => Math.max(1, Math.ceil(props.points.length / 5)))
+// Labelled points (no crowding at the ends, I-20).
+const labelled = computed(() => new Set(axisLabelIndexes(props.points.length)))
 const summary = computed(() => summarise(props.points, props.unit))
-const rows = computed(() => props.points.map((p) => ({ label: p.label, value: String(p.value) })))
+const rows = computed(() => props.points.map((p) => ({ label: p.label, value: String(p.value), amount: p.value })))
 </script>
 
 <template>
@@ -36,7 +36,7 @@ const rows = computed(() => props.points.map((p) => ({ label: p.label, value: St
       <polyline :points="path" class="line-chart__line" />
       <g v-for="(p, i) in points" :key="p.label">
         <circle :cx="x(i)" :cy="y(p.value)" r="4" class="line-chart__dot"><title>{{ p.label }}: {{ p.value }} {{ unit }}</title></circle>
-        <text v-if="i % labelEvery === 0 || i === points.length - 1" :x="x(i)" :y="HEIGHT - 10" text-anchor="middle" class="line-chart__axis">{{ p.label }}</text>
+        <text v-if="labelled.has(i)" :x="x(i)" :y="HEIGHT - 10" text-anchor="middle" class="line-chart__axis">{{ p.label }}</text>
       </g>
     </svg>
   </ChartsChartFrame>

@@ -16,7 +16,7 @@ const height = computed(() => Math.max(1, props.points.length) * ROW + 8)
 const max = computed(() => niceMax(props.points.map((p) => p.value)))
 const barW = (v: number) => (v / max.value) * (WIDTH - LABEL_W - VALUE_W)
 const summary = computed(() => summarise(props.points, props.unit))
-const rows = computed(() => props.points.map((p) => ({ label: p.label, value: String(p.value) })))
+const rows = computed(() => props.points.map((p) => ({ label: p.label, value: String(p.value), amount: p.value })))
 </script>
 
 <template>

@@ -1,9 +1,20 @@
 <!--
   ChartFrame: title, written summary, the chart, and its data table
-  (plan D16: every chart comes with a table). Shared by the three charts.
+  (plan D16: every chart comes with a table). The table is the shared
+  SortableTable, so it follows the approved table pattern (B.2) and can be
+  sorted like every other table (F-08).
 -->
 <script setup lang="ts">
-defineProps<{ title: string; summary: string; labelHeader: string; valueHeader: string; rows: { label: string; value: string }[] }>()
+import type { TableColumn } from '~/components/SortableTable.vue'
+
+export interface ChartRow { label: string; value: string; amount: number }
+
+const props = defineProps<{ title: string; summary: string; labelHeader: string; valueHeader: string; rows: ChartRow[] }>()
+
+const columns: TableColumn<ChartRow>[] = [
+  { key: 'label', label: props.labelHeader, value: (r) => r.label },
+  { key: 'value', label: props.valueHeader, value: (r) => r.amount, type: 'num' },
+]
 </script>
 
 <template>
@@ -13,12 +24,16 @@ defineProps<{ title: string; summary: string; labelHeader: string; valueHeader: 
     <slot />
     <details class="chart__table">
       <summary>Data table</summary>
-      <table>
-        <thead><tr><th scope="col">{{ labelHeader }}</th><th scope="col">{{ valueHeader }}</th></tr></thead>
-        <tbody>
-          <tr v-for="row in rows" :key="row.label"><th scope="row">{{ row.label }}</th><td>{{ row.value }}</td></tr>
-        </tbody>
-      </table>
+      <SortableTable
+        :columns="columns"
+        :rows="rows"
+        :row-key="(r) => r.label"
+        :caption="`${title}: data table.`"
+        :initial-sort="{ key: 'none', direction: 'asc' }"
+        :min-width="240"
+      >
+        <template #cell-value="{ row }">{{ row.value }}</template>
+      </SortableTable>
     </details>
   </figure>
 </template>
@@ -38,9 +53,5 @@ defineProps<{ title: string; summary: string; labelHeader: string; valueHeader: 
 }
 .chart__title { font-size: 15px; font-weight: 700; color: var(--color-text); }
 .chart__summary { margin: 0; font-size: 13px; color: var(--color-text-soft); }
-.chart__table summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--color-teal-dark); }
-.chart__table table { margin-top: 8px; border-collapse: collapse; font-size: 13px; width: 100%; }
-.chart__table th, .chart__table td { text-align: left; padding: 4px 8px; border-bottom: 1px solid var(--color-divider); font-variant-numeric: tabular-nums; }
-.chart__table thead th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-soft); }
-@media print { .chart__table[open], .chart__table { display: block; } }
+.chart__table summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--color-teal-dark); margin-bottom: 8px; }
 </style>

@@ -27,7 +27,7 @@ const slices = computed(() => {
 })
 const share = (v: number) => (total.value ? Math.round((v / total.value) * 100) : 0)
 const summary = computed(() => summarise(props.points, props.unit))
-const rows = computed(() => props.points.map((p) => ({ label: p.label, value: `${p.value} (${share(p.value)}%)` })))
+const rows = computed(() => props.points.map((p) => ({ label: p.label, value: `${p.value} (${share(p.value)}%)`, amount: p.value })))
 </script>
 
 <template>
