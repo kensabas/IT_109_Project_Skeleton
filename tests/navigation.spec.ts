@@ -24,3 +24,17 @@ describe('roleLabel', () => {
     expect(roleLabel('cleaner', false)).toBe('Cleaner')
   })
 })
+
+import { currentNavPath } from '../app/utils/navigation'
+describe('currentNavPath — only one link is marked current', () => {
+  const items = [
+    { label: 'My requests', to: '/client/requests' },
+    { label: 'New request', to: '/client/requests/new' },
+  ]
+  it('picks the longest matching link', () => {
+    expect(currentNavPath(items, '/client/requests/new')).toBe('/client/requests/new')
+    expect(currentNavPath(items, '/client/requests/req-001')).toBe('/client/requests')
+    expect(currentNavPath(items, '/client/requests')).toBe('/client/requests')
+  })
+  it('returns null when nothing matches', () => expect(currentNavPath(items, '/elsewhere')).toBeNull())
+})

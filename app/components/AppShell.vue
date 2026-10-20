@@ -8,7 +8,7 @@
 import { computed, ref, watch } from 'vue'
 import type { Pinia } from 'pinia'
 import { useCurrentUserStore } from '~/stores/currentUser'
-import { navFor, roleLabel } from '~/utils/navigation'
+import { currentNavPath, navFor, roleLabel } from '~/utils/navigation'
 import { NO_ACCESS_NOTICE, LOGIN_PATH } from '~/utils/access'
 import { resetDemoData } from '~/utils/persistence'
 
@@ -24,8 +24,9 @@ const showNoAccess = computed(() => route.query.notice === NO_ACCESS_NOTICE)
 const menuOpen = ref(false)
 watch(() => route.fullPath, () => { menuOpen.value = false })
 
+const currentPath = computed(() => currentNavPath(links.value, route.path))
 function isCurrent(to: string): boolean {
-  return route.path === to || route.path.startsWith(`${to}/`)
+  return currentPath.value === to
 }
 
 function signOut() {

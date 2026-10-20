@@ -5,7 +5,11 @@ import type { UserRole } from '../data/mockUsers'
 export interface NavItem { label: string; to: string }
 
 const NAV: Record<UserRole, NavItem[]> = {
-  client: [{ label: 'My requests', to: '/client/requests' }],
+  client: [
+    { label: 'My requests', to: '/client/requests' },
+    { label: 'New request', to: '/client/requests/new' },
+    { label: 'Calendar', to: '/client/calendar' },
+  ],
   cleaner: [{ label: 'Marketplace', to: '/cleaner/marketplace' }],
   admin: [{ label: 'Job posts', to: '/admin/jobs' }],
 }
@@ -22,4 +26,12 @@ const ROLE_LABEL: Record<UserRole, string> = {
 
 export function roleLabel(role: UserRole, isMainAdmin: boolean): string {
   return role === 'admin' && isMainAdmin ? 'Main admin' : ROLE_LABEL[role]
+}
+
+// The link to mark with aria-current: the longest link that the path is
+// on or under, so "/client/requests/new" does not also mark "/client/requests".
+export function currentNavPath(items: NavItem[], path: string): string | null {
+  const matches = items.filter((item) => path === item.to || path.startsWith(`${item.to}/`))
+  if (!matches.length) return null
+  return matches.reduce((best, item) => (item.to.length > best.to.length ? item : best)).to
 }
