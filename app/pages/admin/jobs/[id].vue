@@ -359,9 +359,10 @@ function doArchive() {
 }
 .detail-page__back-link,
 .detail-page__link {
-  /* Tap target at least 24 px tall (I-25). */
+  /* Tap target 44 px tall without moving the layout (step 1d). */
   display: inline-block;
-  padding-block: 3px;
+  padding-block: 12px;
+  margin-block: -9px;
   color: var(--color-teal-dark);
   font-weight: 600;
   text-decoration: none;

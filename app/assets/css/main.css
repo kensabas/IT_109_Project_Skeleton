@@ -176,7 +176,7 @@ a {
 .btn--secondary { background-color: var(--color-card); color: var(--color-text); border-color: var(--color-input-border); }
 .btn--secondary:hover:not(:disabled) { border-color: var(--color-teal); }
 .btn--danger { background-color: var(--color-error); color: var(--color-on-teal); }
-.btn--small { min-height: 36px; padding: 0 12px; font-size: 14px; }
+.btn--small { min-height: 44px; padding: 0 12px; font-size: 14px; }
 .btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
 .link {
@@ -187,10 +187,11 @@ a {
 }
 .link:hover { text-decoration: underline; }
 
-/* Tap targets at least 24 px tall (WCAG 2.5.8) for links that stand on
- * their own, summary toggles and checkbox / radio labels (I-25). */
-.link { display: inline-block; padding-block: 3px; }
-summary { padding-block: 4px; }
+/* Tap targets 44 px tall (polish D step 1d; WCAG 2.5.8 minimum is 24 px,
+ * I-25). Text links get 12 px of padding above and below, taken back with
+ * a negative margin, so the target grows without moving the layout. */
+.link { display: inline-block; padding-block: 12px; margin-block: -9px; }
+summary { padding-block: 13px; }
 
 /* Page layout helpers. */
 .page-stack { display: flex; flex-direction: column; gap: 18px; }
@@ -255,6 +256,10 @@ select.field__input {
   background-position: right 12px center;
   background-size: 20px 20px;
 }
+/* Range sliders: 44 px touch height. */
+input[type='range'] { min-height: 44px; height: 44px; }
+/* Leaflet zoom buttons: 44 px (were 30 px). */
+.leaflet-control-zoom a { width: 44px !important; height: 44px !important; line-height: 44px !important; font-size: 22px !important; }
 .field__input[aria-invalid='true'] { border-color: var(--color-error); }
 .field__error { margin: 0; font-size: 14px; color: var(--color-error); }
 .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
@@ -268,7 +273,7 @@ select.field__input {
 .muted { color: var(--color-text-soft); font-style: italic; }
 
 /* Checkbox with its label on one line (filters). */
-.inline-check { display: inline-flex; align-items: center; gap: 8px; min-height: 24px; font-size: 14px; color: var(--color-text); width: fit-content; cursor: pointer; }
+.inline-check { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 14px; color: var(--color-text); width: fit-content; cursor: pointer; }
 .inline-check input { width: 18px; height: 18px; accent-color: var(--color-teal); }
 
 /* Chart colours (Wave 5.2, darkened in polish C). One-series charts use

@@ -144,7 +144,7 @@ function doReset() {
   border-bottom: 1px solid var(--color-card-border);
 }
 .shell__bar { display: flex; align-items: center; gap: 10px; }
-.shell__brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; border-radius: 4px; }
+.shell__brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; text-decoration: none; border-radius: 4px; }
 .shell__wordmark { font-size: 18px; font-weight: 800; color: var(--color-text); letter-spacing: -0.01em; }
 .shell__role {
   padding: 3px 10px;
@@ -162,7 +162,9 @@ function doReset() {
 .shell__nav-area { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; flex: 1; justify-content: space-between; }
 .shell__nav { list-style: none; display: flex; flex-wrap: wrap; gap: 4px; margin: 0; padding: 0; }
 .shell__nav-link {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   padding: 8px 12px;
   border-radius: var(--radius-control);
   color: var(--color-text);

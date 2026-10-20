@@ -124,6 +124,6 @@ function confirm() {
 .row-request { min-width: 260px; }
 .row-description { margin: 4px 0 0; font-size: 13px; color: var(--color-text-soft); max-width: 320px; }
 .row-soft { font-size: 13px; color: var(--color-text-soft); }
-.row-link { display: block; margin-top: 4px; padding-block: 3px; font-size: 13px; }
+.row-link { display: block; margin-top: -8px; margin-bottom: -12px; padding-block: 13px; font-size: 13px; }
 .row-actions { display: flex; flex-wrap: wrap; gap: 6px; }
 </style>
