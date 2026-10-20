@@ -4,20 +4,16 @@
 // CLAUDE/screenshots/report.json so problems are not missed.
 //
 // Usage: node scripts/shots.mjs [baseUrl] [nameFilter]
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { chromium } from 'playwright'
-import { ROUTES, SIGN_IN_AS } from './routes.mjs'
+import { ROUTES } from './routes.mjs'
+import { signInAs } from './session.mjs'
 
 const BASE_URL = process.argv[2] ?? 'http://localhost:3000'
 const NAME_FILTER = process.argv[3] ?? ''
 const WIDTHS = [1280, 768, 375]
 const HEIGHT_FOR_WIDTH = { 1280: 800, 768: 1024, 375: 812 }
 const OUT_DIR = 'CLAUDE/screenshots'
-const SESSION_KEY = 'cleanlinis:session'
-const SCHEMA_KEY = 'cleanlinis:schema'
-// Read the app's schema version so the persist plugin keeps the injected
-// session (it clears saved data written under another version).
-const SCHEMA_VERSION = readFileSync('app/utils/persistence.ts', 'utf8').match(/SCHEMA_VERSION = (\d+)/)[1]
 
 mkdirSync(OUT_DIR, { recursive: true })
 const browser = await chromium.launch()
@@ -28,17 +24,7 @@ for (const route of ROUTES.filter((r) => r.name.includes(NAME_FILTER))) {
     const context = await browser.newContext({
       viewport: { width, height: HEIGHT_FOR_WIDTH[width] },
     })
-    const email = route.role ? SIGN_IN_AS[route.role] : null
-    await context.addInitScript(
-      ([key, value, schemaKey, schemaVersion]) => {
-        if (value && !window.sessionStorage.getItem('shots-seeded')) {
-          window.localStorage.setItem(schemaKey, schemaVersion)
-          window.localStorage.setItem(key, value)
-          window.sessionStorage.setItem('shots-seeded', '1')
-        }
-      },
-      [SESSION_KEY, email, SCHEMA_KEY, SCHEMA_VERSION],
-    )
+    await signInAs(context, route.role)
     const page = await context.newPage()
     const errors = []
     page.on('console', (msg) => {
