@@ -45,6 +45,15 @@ export const useJobsStore = defineStore('jobs', {
       job.archivedAt = new Date().toISOString()
     },
 
+    // Plan D3 (Q13, unconfirmed): admins can bring an archived post back.
+    restoreJob(id: string): StoreResult {
+      const job = this.jobs.find((j) => j.id === id)
+      if (!job) return { ok: false, error: 'Job not found.' }
+      if (job.archivedAt === null) return { ok: false, error: 'This job is not archived.' }
+      job.archivedAt = null
+      return { ok: true }
+    },
+
     setStatus(id: string, status: JobStatus): StoreResult {
       if (!(JOB_STATUSES as readonly string[]).includes(status)) {
         return { ok: false, error: 'Unknown status.' }
