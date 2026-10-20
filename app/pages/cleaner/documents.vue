@@ -66,7 +66,7 @@ function onFile(type: DocumentType, event: Event) {
 .doc { display: flex; flex-direction: column; gap: 10px; padding: 18px; }
 .doc__head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; }
 .doc__title { margin: 0; font-size: 16px; font-weight: 700; }
-.doc__file { margin: 0; font-size: 13px; color: var(--color-text-soft); word-break: break-all; }
+.doc__file { margin: 0; font-size: 13px; color: var(--color-text-soft); overflow-wrap: anywhere; }
 .doc__note { margin: 0; font-size: 14px; color: var(--color-error); }
 .doc__input { padding: 10px; }
 @media (max-width: 400px) { .docs { grid-template-columns: 1fr; } }
