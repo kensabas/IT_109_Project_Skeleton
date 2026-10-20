@@ -28,16 +28,21 @@ export const REQUEST_ERRORS = {
 
 const WHOLE_NUMBER = /^\d+$/
 
+// Number inputs bound with v-model give numbers, not strings (I-12).
+function text(value: unknown): string {
+  return value === null || value === undefined ? '' : String(value).trim()
+}
+
 export function validateRequestForm(values: RequestFormValues, today: string): FieldErrors<RequestField> {
   const errors: FieldErrors<RequestField> = {}
   for (const field of REQUEST_FIELD_ORDER) {
-    if (!values[field].trim()) errors[field] = REQUEST_ERRORS.required
+    if (!text(values[field])) errors[field] = REQUEST_ERRORS.required
   }
   if (!errors.date && values.date < today) errors.date = REQUEST_ERRORS.pastDate
   if (!errors.startTime && !errors.endTime && values.endTime <= values.startTime) {
     errors.endTime = REQUEST_ERRORS.endBeforeStart
   }
-  if (!errors.ratePhp && (!WHOLE_NUMBER.test(values.ratePhp.trim()) || Number(values.ratePhp) <= 0)) {
+  if (!errors.ratePhp && (!WHOLE_NUMBER.test(text(values.ratePhp)) || Number(values.ratePhp) <= 0)) {
     errors.ratePhp = REQUEST_ERRORS.rate
   }
   return errors

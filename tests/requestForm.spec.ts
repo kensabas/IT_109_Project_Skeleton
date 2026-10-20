@@ -44,3 +44,11 @@ describe('validateRequestForm', () => {
     expect(firstErroredField(errors, REQUEST_FIELD_ORDER)).toBe('title')
   })
 })
+
+describe('validateRequestForm — number inputs (I-12)', () => {
+  it('accepts the rate as a number, which is what a number input gives', () => {
+    const fromNumberInput = { ...valid, ratePhp: 450 as unknown as string }
+    expect(() => validateRequestForm(fromNumberInput, TODAY)).not.toThrow()
+    expect(validateRequestForm(fromNumberInput, TODAY)).toEqual({})
+  })
+})
