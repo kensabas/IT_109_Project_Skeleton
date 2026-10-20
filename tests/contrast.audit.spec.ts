@@ -7,23 +7,25 @@
 
 import { describe, it, expect } from 'vitest'
 import { contrastRatio } from '../app/utils/contrast'
+import { mainCssTokens, token } from './helpers/mainCss'
 
-// Values are COPIED FROM main.css — do not retype from memory.
-// (If main.css changes, this file needs to be updated too.)
+// Wave 0.5 [I-4]: values are READ FROM main.css at test time, so this
+// audit always checks the real tokens (it used to hold typed copies).
+const tokens = mainCssTokens()
 const C = {
-  teal: '#0E7C7B',
-  tealDark: '#0B6665',
-  text: '#0F2A2E',
-  textSoft: '#4A6663',
-  bg: '#F4F7F6',
-  card: '#FFFFFF',
-  cardBorder: '#DDE6E4',
-  inputBorder: '#7A9490',
-  noticeBg: '#FDF1D6',
-  noticeText: '#5C3F00',
-  accent: '#F2B33D',
-  error: '#B91C1C',
-  white: '#FFFFFF',
+  teal: token(tokens, '--color-teal'),
+  tealDark: token(tokens, '--color-teal-dark'),
+  text: token(tokens, '--color-text'),
+  textSoft: token(tokens, '--color-text-soft'),
+  bg: token(tokens, '--color-bg'),
+  card: token(tokens, '--color-card'),
+  cardBorder: token(tokens, '--color-card-border'),
+  inputBorder: token(tokens, '--color-input-border'),
+  noticeBg: token(tokens, '--color-notice-bg'),
+  noticeText: token(tokens, '--color-notice-text'),
+  accent: token(tokens, '--color-accent'),
+  error: token(tokens, '--color-error'),
+  white: token(tokens, '--color-on-teal'),
 }
 
 type Pair = {
