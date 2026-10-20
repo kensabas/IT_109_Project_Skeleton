@@ -48,3 +48,33 @@ export function sortRows<T, K>(
   })
   return copy
 }
+
+// Wave 1.6 [F-08] — helpers for the shared SortableTable.
+
+function isEmpty(value: unknown): boolean {
+  return value === null || value === undefined || value === ''
+}
+
+// Like sortRows, but empty values (null, undefined, '') always go to the
+// end, in both directions, so "Not assigned" rows never jump to the top.
+export function sortRowsEmptyLast<T>(
+  rows: readonly T[],
+  keyFn: (row: T) => unknown,
+  direction: SortDirection,
+): T[] {
+  const filled = rows.filter((r) => !isEmpty(keyFn(r)))
+  const empty = rows.filter((r) => isEmpty(keyFn(r)))
+  return [...sortRows(filled, keyFn, direction), ...empty]
+}
+
+export interface SortState { key: string; direction: SortDirection }
+
+export function nextSort(current: SortState, clickedKey: string): SortState {
+  if (current.key === clickedKey) return { key: clickedKey, direction: toggleDirection(current.direction) }
+  return { key: clickedKey, direction: 'asc' }
+}
+
+export function ariaSortFor(state: SortState, key: string): 'ascending' | 'descending' | 'none' {
+  if (state.key !== key) return 'none'
+  return state.direction === 'asc' ? 'ascending' : 'descending'
+}
