@@ -179,22 +179,16 @@ function doArchive() {
 
         <p v-if="restoreMessage" class="detail-page__message" role="status">{{ restoreMessage }}</p>
 
-        <!-- In-page archive confirm (NOT window.confirm) -->
-        <div
-          v-if="confirmingArchive"
-          class="confirm-card"
-          role="alertdialog"
-          aria-labelledby="archive-confirm-title"
+        <!-- In-page archive confirm (shared ConfirmPanel: focus moves in, Escape closes, focus returns) -->
+        <ConfirmPanel
+          :open="confirmingArchive"
+          title="Archive this job?"
+          confirm-label="Yes, archive"
+          @confirm="doArchive"
+          @cancel="cancelConfirm"
         >
-          <h2 id="archive-confirm-title" class="confirm-card__title">Archive this job?</h2>
-          <p class="confirm-card__body">
-            Archived jobs are hidden from the main list. The record is kept, can be viewed with "Show archived", and can be restored.
-          </p>
-          <div class="confirm-card__actions">
-            <BaseButton type="button" class="confirm-card__btn" @click="doArchive">Yes, archive</BaseButton>
-            <button type="button" class="confirm-card__cancel" @click="cancelConfirm">Cancel</button>
-          </div>
-        </div>
+          <p>Archived jobs are hidden from the main list. The record is kept, can be viewed with "Show archived", and can be restored.</p>
+        </ConfirmPanel>
 
         <div class="detail-grid">
           <!-- Left: job details card -->
@@ -397,31 +391,6 @@ function doArchive() {
 .detail-page__message { margin: 0; font-size: 14px; color: var(--color-text); }
 .detail-page__archived-note { margin: 0; font-size: 14px; color: var(--color-text-soft); font-style: italic; }
 
-/* Archive confirm card (in-page, NOT a native alert) */
-.confirm-card {
-  background-color: var(--color-notice-bg);
-  color: var(--color-notice-text);
-  border-radius: var(--radius-control);
-  padding: 16px;
-}
-.confirm-card__title { margin: 0 0 6px; font-size: 16px; font-weight: 700; }
-.confirm-card__body { margin: 0 0 12px; font-size: 14px; line-height: 1.5; }
-.confirm-card__actions { display: flex; flex-wrap: wrap; gap: 10px; }
-.confirm-card__btn { width: auto; min-width: 160px; }
-.confirm-card__cancel {
-  all: unset;
-  padding: 10px 16px;
-  font-weight: 600;
-  color: var(--color-text);
-  background-color: var(--color-card);
-  border: 1px solid var(--color-card-border);
-  border-radius: var(--radius-control);
-  cursor: pointer;
-}
-.confirm-card__cancel:focus-visible {
-  outline: 2px solid var(--color-teal);
-  outline-offset: 2px;
-}
 
 .detail-grid {
   display: grid;
