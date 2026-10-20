@@ -98,3 +98,66 @@ await browser.close()
   console.log(JSON.stringify(['client calendar', month, listItems, next, nextItems, errs.length, errs.slice(0, 3)]))
   await b.close()
 }
+
+// Wave 4 — admin: approve request, assign / unassign, accounts, documents, create admin, disputes, bookings, calendar.
+{
+  const b = await chromium.launch()
+  const c = await b.newContext(); const p = await c.newPage(); const errs = []
+  p.on('console', (m) => { if (['error', 'warning'].includes(m.type())) errs.push(m.text()) })
+  p.on('pageerror', (e) => errs.push(e.message))
+  const login = async (email, pw, home) => { await p.goto(B + '/login'); await p.fill('#login-email', email); await p.fill('#login-password', pw); await p.click('button[type=submit]'); await p.waitForURL('**' + home) }
+  await login('admin.main@example.com', 'AdminMain2026', '/admin/jobs')
+  const navLinks = await p.locator('nav[aria-label=Main] a').allTextContents()
+  console.log(JSON.stringify(['admin nav', navLinks.map((t) => t.trim())]))
+
+  await p.goto(B + '/admin/requests'); await p.click('button[aria-label="Approve Kitchen and living room clean"]')
+  const panelFocus = await p.evaluate(() => document.activeElement?.getAttribute('role'))
+  await p.click('button:has-text("Yes, approve and publish")')
+  const approveMsg = (await p.textContent('.message'))?.trim()
+  await p.click('text=Open the job post'); await p.waitForURL(/\/admin\/jobs\/job-0\d\d/)
+  console.log(JSON.stringify(['admin approve request', panelFocus, approveMsg, new URL(p.url()).pathname, await p.textContent('h1')]))
+
+  await p.goto(B + '/admin/jobs/job-005'); await p.click('button[aria-label="Assign Pedro Mendoza"]'); await p.click('button:has-text("Yes, assign")')
+  const assigned = (await p.textContent('.cleaner__name'))?.trim(); const assignMsg = (await p.textContent('.message'))?.trim()
+  await p.click('button:has-text("Unassign cleaner")'); await p.click('button:has-text("Yes, unassign")')
+  const afterUnassign = (await p.textContent('.cleaner__none'))?.trim()
+  console.log(JSON.stringify(['admin assign + unassign', assigned, assignMsg, afterUnassign]))
+
+  await p.goto(B + '/admin/accounts'); await p.waitForSelector('tbody tr'); const rowsAll = await p.locator('tbody tr').count()
+  await p.selectOption('#accounts-role', 'cleaner'); const rowsCleaners = await p.locator('tbody tr').count()
+  await p.click('button[aria-label="Suspend Rosa Garcia"]'); await p.click('button:has-text("Yes, suspend")')
+  const suspendMsg = (await p.textContent('.message'))?.trim()
+  await p.click('button[aria-label="Activate Rosa Garcia"]'); await p.click('button:has-text("Yes, activate")')
+  console.log(JSON.stringify(['admin accounts', rowsAll, rowsCleaners, suspendMsg, (await p.textContent('.message'))?.trim()]))
+
+  await p.goto(B + '/admin/accounts/liza.fernandez%40example.com')
+  await p.click('button:has-text("Approve cleaner")'); await p.click('button:has-text("Yes, approve")')
+  const blocked = (await p.textContent('.message'))?.trim()
+  await p.click('button[aria-label="Approve Birth certificate"]'); const docMsg = (await p.textContent('.message'))?.trim()
+  const docsTitle = (await p.textContent('#docs-title'))?.trim()
+  console.log(JSON.stringify(['admin documents', blocked, docMsg, docsTitle]))
+
+  await p.goto(B + '/admin/accounts/new'); await p.click('button:has-text("Create admin account")')
+  const firstErr = await p.evaluate(() => document.activeElement?.id)
+  await p.fill('#admin-name', 'Bea Lim'); await p.fill('#admin-email', 'bea.lim@example.com'); await p.fill('#admin-mobile', '09170000009'); await p.fill('#admin-password', 'AdminNew2026'); await p.fill('#admin-confirm', 'AdminNew2026')
+  await p.click('button:has-text("Create admin account")')
+  console.log(JSON.stringify(['main admin creates admin', firstErr, (await p.textContent('.message'))?.trim()]))
+
+  await p.goto(B + '/admin/bookings'); await p.waitForSelector('tbody tr'); const bookingRows = await p.locator('tbody tr').count()
+  await p.click('a[aria-label="Open a dispute on Office cleaning"]'); await p.waitForSelector('#dispute-form')
+  const pre = await p.inputValue('#dispute-job')
+  await p.fill('#dispute-title', 'Broken vase'); await p.fill('#dispute-description', 'Client reports a broken vase.'); await p.fill('#dispute-party-name', 'Lim Trading Corp.')
+  await p.click('button:has-text("Open dispute")'); await p.click('text=Open it to add notes'); await p.waitForURL(/dsp-\d+/)
+  await p.fill('#note-text', 'Asked the cleaner for her side.'); await p.click('button:has-text("Add note")')
+  const notes = (await p.textContent('#notes-title'))?.trim()
+  await p.click('button:has-text("Mark as resolved")'); await p.click('button:has-text("Yes, resolve")')
+  console.log(JSON.stringify(['admin disputes', bookingRows, pre, notes, (await p.textContent('.status-badge'))?.trim()]))
+
+  await p.goto(B + '/admin/calendar'); await p.waitForSelector('#calendar-title')
+  console.log(JSON.stringify(['admin calendar', await p.textContent('#calendar-title'), await p.locator('.calendar__list-item').count()]))
+
+  await p.click('text=Sign out'); await login('admin.staff@example.com', 'AdminStaff2026', '/admin/jobs')
+  await p.goto(B + '/admin/accounts/new')
+  console.log(JSON.stringify(['regular admin create admin', (await p.textContent('.card strong'))?.trim(), errs.length, errs.slice(0, 3)]))
+  await b.close()
+}
