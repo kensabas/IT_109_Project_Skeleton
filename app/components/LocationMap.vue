@@ -28,6 +28,32 @@ let map: any = null
 let marker: any = null
 let leaflet: any = null
 
+// Leaflet 1.9.4 copies every property of a click event (Map._fireDOMEvent,
+// to make its 'preclick' event). In Firefox that copy reads the deprecated
+// MouseEvent.mozPressure / mozInputSource and logs two warnings per click
+// (I-34). Through Leaflet's include() extension point, click events are
+// handed over as a copy without those two fields; methods stay bound to the
+// real event, so preventDefault and positions still work.
+const DEPRECATED_FIELDS = new Set(['mozPressure', 'mozInputSource'])
+let patched = false
+function avoidDeprecatedEventReads(L: any) {
+  if (patched) return
+  patched = true
+  const original = L.Map.prototype._fireDOMEvent
+  L.Map.include({
+    _fireDOMEvent(this: unknown, event: any, type: string, targets: unknown) {
+      if (event?.type !== 'click' || !(event instanceof MouseEvent)) return original.call(this, event, type, targets)
+      const copy: Record<string, unknown> = {}
+      for (const key in event) {
+        if (DEPRECATED_FIELDS.has(key)) continue
+        const value = (event as any)[key]
+        copy[key] = typeof value === 'function' ? value.bind(event) : value
+      }
+      return original.call(this, copy, type, targets)
+    },
+  })
+}
+
 function place(point: { lat: number; lng: number }) {
   if (!map || !leaflet) return
   if (marker) marker.setLatLng(point)
@@ -68,6 +94,7 @@ onMounted(async () => {
     return
   }
   if (!container.value) return
+  avoidDeprecatedEventReads(leaflet)
   const start = props.modelValue ?? MANILA
   map = leaflet.map(container.value, { keyboard: true }).setView(start, props.modelValue ? PIN_ZOOM : COUNTRY_ZOOM)
   let loaded = false
