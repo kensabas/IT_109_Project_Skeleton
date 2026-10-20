@@ -2,7 +2,9 @@
 // each wave builds its pages, so the menu never points at a missing page.
 import type { UserRole } from '../data/mockUsers'
 
-export interface NavItem { label: string; to: string }
+// `also`: other paths that belong to this menu section (for example a
+// cleaner's job page belongs to Marketplace), so it is marked current there.
+export interface NavItem { label: string; to: string; also?: string[] }
 
 const NAV: Record<UserRole, NavItem[]> = {
   client: [
@@ -11,7 +13,7 @@ const NAV: Record<UserRole, NavItem[]> = {
     { label: 'Calendar', to: '/client/calendar' },
   ],
   cleaner: [
-    { label: 'Marketplace', to: '/cleaner/marketplace' },
+    { label: 'Marketplace', to: '/cleaner/marketplace', also: ['/cleaner/jobs'] },
     { label: 'My applications', to: '/cleaner/applications' },
     { label: 'My documents', to: '/cleaner/documents' },
     { label: 'My location', to: '/cleaner/location' },
@@ -45,7 +47,12 @@ export function roleLabel(role: UserRole, isMainAdmin: boolean): string {
 // The link to mark with aria-current: the longest link that the path is
 // on or under, so "/client/requests/new" does not also mark "/client/requests".
 export function currentNavPath(items: NavItem[], path: string): string | null {
-  const matches = items.filter((item) => path === item.to || path.startsWith(`${item.to}/`))
-  if (!matches.length) return null
-  return matches.reduce((best, item) => (item.to.length > best.to.length ? item : best)).to
+  const under = (base: string) => path === base || path.startsWith(`${base}/`)
+  let best: { to: string; length: number } | null = null
+  for (const item of items) {
+    for (const base of [item.to, ...(item.also ?? [])]) {
+      if (under(base) && (!best || base.length > best.length)) best = { to: item.to, length: base.length }
+    }
+  }
+  return best?.to ?? null
 }

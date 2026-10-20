@@ -38,3 +38,19 @@ describe('currentNavPath — only one link is marked current', () => {
   })
   it('returns null when nothing matches', () => expect(currentNavPath(items, '/elsewhere')).toBeNull())
 })
+
+describe('currentNavPath — pages that belong to a menu section (I-24)', () => {
+  it('a cleaner job page marks Marketplace as current', () => {
+    expect(currentNavPath(navFor('cleaner'), '/cleaner/jobs/job-005')).toBe('/cleaner/marketplace')
+  })
+  it('every page of each role has a current menu link', () => {
+    const pages: Record<string, string[]> = {
+      client: ['/client/requests', '/client/requests/new', '/client/requests/req-001', '/client/calendar'],
+      cleaner: ['/cleaner/marketplace', '/cleaner/jobs/job-005', '/cleaner/applications', '/cleaner/documents', '/cleaner/location', '/cleaner/calendar'],
+      admin: ['/admin/jobs', '/admin/jobs/job-001', '/admin/requests', '/admin/bookings', '/admin/accounts', '/admin/accounts/new', '/admin/accounts/x%40y', '/admin/disputes', '/admin/disputes/dsp-001', '/admin/reports', '/admin/calendar'],
+    }
+    for (const [role, paths] of Object.entries(pages)) {
+      for (const path of paths) expect(currentNavPath(navFor(role as 'client'), path), path).not.toBeNull()
+    }
+  })
+})
