@@ -23,6 +23,7 @@ import type { MockUser } from '~/data/mockUsers'
 import { useCurrentUserStore } from '~/stores/currentUser'
 import { ACCOUNT_STATE_LABEL } from '~/utils/labels'
 import { ACCOUNT_STATE_TONE } from '~/utils/statusTones'
+import { formatDateLong as fullDate, formatPeso, formatTime12h as hhmm } from '~/utils/format'
 import { JOB_STATUSES, type Job, type JobStatus } from '~/data/mockJobs'
 
 const route = useRoute()
@@ -40,27 +41,6 @@ function cleanerFor(j: Job): MockUser | undefined {
 function initialsFor(name: string): string {
   const parts = name.trim().split(/\s+/).slice(0, 2)
   return parts.map((p) => p[0] ?? '').join('').toUpperCase()
-}
-
-const peso = new Intl.NumberFormat('en-PH', {
-  style: 'currency',
-  currency: 'PHP',
-  maximumFractionDigits: 0,
-})
-const dateLong = new Intl.DateTimeFormat('en-PH', {
-  weekday: 'long',
-  day: '2-digit',
-  month: 'long',
-  year: 'numeric',
-})
-function fullDate(iso: string): string {
-  return dateLong.format(new Date(`${iso}T12:00:00+08:00`))
-}
-function hhmm(h24: string): string {
-  const [h, m] = h24.split(':').map((n) => parseInt(n, 10))
-  const period = h >= 12 ? 'PM' : 'AM'
-  const hour12 = ((h + 11) % 12) + 1
-  return `${hour12}:${m.toString().padStart(2, '0')} ${period}`
 }
 
 const STATUS_LABEL: Record<JobStatus, string> = {
@@ -188,7 +168,7 @@ function doArchive() {
               </div>
               <div class="info-list__row">
                 <dt>Rate</dt>
-                <dd>{{ peso.format(job.ratePhp) }}</dd>
+                <dd>{{ formatPeso(job.ratePhp) }}</dd>
               </div>
               <div class="info-list__row">
                 <dt>Date</dt>

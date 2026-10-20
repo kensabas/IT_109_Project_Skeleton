@@ -1,335 +1,89 @@
 <!--
-  /admin/jobs — F-17/18/19 Phase 3.
-  Admin job-posts list. Column headers are buttons that sort the table;
-  `aria-sort` on the matching `<th>` reflects the current column +
-  direction. Status is a <StatusChip> (text + colour, not colour only).
-
-  Wrapped in the AppShell; the route guard limits it to admins (Wave 1).
+  /admin/jobs [F-17, F-18, F-19] — admin job-posts list.
+  Uses the shared SortableTable (F-08, Wave 1.6). Status is a StatusChip
+  (text + colour). "Show archived" reveals soft-deleted posts (plan D3).
 -->
 <script setup lang="ts">
-definePageMeta({ layout: 'app' })
 import { computed, ref } from 'vue'
 import { useJobsStore } from '~/stores/jobs'
-import { initialMockUsers, type MockUser } from '~/data/mockUsers'
-import type { Job, JobStatus } from '~/data/mockJobs'
-import {
-  sortRows,
-  toggleDirection,
-  STATUS_RANK,
-  type SortDirection,
-} from '~/utils/sortRows'
+import { useCurrentUserStore } from '~/stores/currentUser'
+import type { Job } from '~/data/mockJobs'
+import type { TableColumn } from '~/components/SortableTable.vue'
+import { STATUS_RANK } from '~/utils/sortRows'
+import { formatDateShort, formatPeso } from '~/utils/format'
 
-type ColumnKey = 'title' | 'clientName' | 'date' | 'ratePhp' | 'cleaner' | 'status'
+definePageMeta({ layout: 'app' })
 
 const jobs = useJobsStore()
+const users = useCurrentUserStore()
 const showArchived = ref(false)
-const sortKey = ref<ColumnKey>('date')
-const sortDir = ref<SortDirection>('desc')
 
-// Phase-3 scope: look up cleaner display info from the mock users list
-// (static — see mockUsers.ts) by matching email === assignedCleanerId.
-const CLEANERS: MockUser[] = initialMockUsers()
-function cleanerFor(job: Job): MockUser | undefined {
-  if (!job.assignedCleanerId) return undefined
-  return CLEANERS.find((u) => u.email === job.assignedCleanerId)
-}
-function cleanerLabel(job: Job): string {
-  return cleanerFor(job)?.name ?? 'Not assigned'
+function cleanerName(job: Job): string | null {
+  if (!job.assignedCleanerId) return null
+  return users.users.find((u) => u.email === job.assignedCleanerId)?.name ?? job.assignedCleanerId
 }
 
-const peso = new Intl.NumberFormat('en-PH', {
-  style: 'currency',
-  currency: 'PHP',
-  maximumFractionDigits: 0,
-})
-const dateLabel = new Intl.DateTimeFormat('en-PH', {
-  weekday: 'short',
-  day: '2-digit',
-  month: 'short',
-  year: 'numeric',
-})
-function formatDate(iso: string): string {
-  // Build with a safe midday timezone to avoid off-by-one day drift.
-  return dateLabel.format(new Date(`${iso}T12:00:00+08:00`))
-}
+const rows = computed(() => jobs.visibleJobs(showArchived.value))
 
-const rows = computed<Job[]>(() => {
-  const visible = jobs.visibleJobs(showArchived.value)
-  const asc = sortDir.value === 'asc'
-  switch (sortKey.value) {
-    case 'title':
-      return sortRows(visible, (j) => j.title, sortDir.value)
-    case 'clientName':
-      return sortRows(visible, (j) => j.clientName, sortDir.value)
-    case 'date':
-      return sortRows(visible, (j) => j.date, sortDir.value)
-    case 'ratePhp':
-      return sortRows(visible, (j) => j.ratePhp, sortDir.value)
-    case 'cleaner':
-      // "Not assigned" always last: on asc use '￿', on desc use '' so
-      // nulls still land at the end of the list.
-      return sortRows(visible, (j) => cleanerLabel(j) === 'Not assigned' ? (asc ? '￿' : '') : cleanerFor(j)!.name, sortDir.value)
-    case 'status':
-      return sortRows(visible, (j) => STATUS_RANK[j.status], sortDir.value)
-  }
-})
-
-function onHeaderClick(key: ColumnKey) {
-  if (sortKey.value === key) {
-    sortDir.value = toggleDirection(sortDir.value)
-  } else {
-    sortKey.value = key
-    sortDir.value = 'asc'
-  }
-}
-function ariaSort(key: ColumnKey): 'ascending' | 'descending' | 'none' {
-  if (sortKey.value !== key) return 'none'
-  return sortDir.value === 'asc' ? 'ascending' : 'descending'
-}
-
-const COLUMNS: { key: ColumnKey; label: string }[] = [
-  { key: 'title',      label: 'Job' },
-  { key: 'clientName', label: 'Client' },
-  { key: 'date',       label: 'Date' },
-  { key: 'ratePhp',    label: 'Rate' },
-  { key: 'cleaner',    label: 'Cleaner' },
-  { key: 'status',     label: 'Status' },
+const columns: TableColumn<Job>[] = [
+  { key: 'title', label: 'Job', value: (j) => j.title },
+  { key: 'client', label: 'Client', value: (j) => j.clientName },
+  { key: 'date', label: 'Date', value: (j) => j.date, type: 'date' },
+  { key: 'rate', label: 'Rate', value: (j) => j.ratePhp, type: 'num' },
+  { key: 'cleaner', label: 'Cleaner', value: (j) => cleanerName(j) },
+  { key: 'status', label: 'Status', value: (j) => STATUS_RANK[j.status] },
 ]
 </script>
 
 <template>
-    <div class="admin-page">
-      <h1 class="admin-page__title">Job posts</h1>
+  <div class="page-stack">
+    <PageHeader title="Job posts" subtitle="All job posts published from approved client requests." />
 
-      <label class="admin-page__filter">
-        <input type="checkbox" v-model="showArchived" />
-        <span>Show archived</span>
-      </label>
+    <label class="jobs-filter">
+      <input v-model="showArchived" type="checkbox" />
+      <span>Show archived</span>
+    </label>
 
-      <section class="jobs-card">
-        <div class="jobs-card__scroll">
-          <table class="jobs-table">
-            <caption class="jobs-table__caption">All job posts, sortable.</caption>
-            <thead>
-              <tr>
-                <th
-                  v-for="col in COLUMNS" :key="col.key"
-                  scope="col"
-                  :aria-sort="ariaSort(col.key)"
-                >
-                  <button
-                    type="button"
-                    class="jobs-table__sort"
-                    :class="{ 'jobs-table__sort--active': sortKey === col.key }"
-                    @click="onHeaderClick(col.key)"
-                  >
-                    {{ col.label }}
-                    <span class="jobs-table__arrow" aria-hidden="true">
-                      <template v-if="sortKey === col.key">{{ sortDir === 'asc' ? '▲' : '▼' }}</template>
-                      <template v-else>⇵</template>
-                    </span>
-                  </button>
-                </th>
-              </tr>
-            </thead>
-            <tbody v-if="rows.length > 0">
-              <tr v-for="job in rows" :key="job.id">
-                <td>
-                  <NuxtLink :to="`/admin/jobs/${job.id}`" class="jobs-table__link">
-                    {{ job.title }}
-                  </NuxtLink>
-                </td>
-                <td>{{ job.clientName }}</td>
-                <td class="jobs-table__date">{{ formatDate(job.date) }}</td>
-                <td class="jobs-table__num">{{ peso.format(job.ratePhp) }}</td>
-                <td>
-                  <span v-if="cleanerFor(job)">{{ cleanerFor(job)!.name }}</span>
-                  <span v-else class="jobs-table__muted">Not assigned</span>
-                </td>
-                <td>
-                  <StatusChip :status="job.status" />
-                </td>
-              </tr>
-            </tbody>
-            <tbody v-else>
-              <tr>
-                <td :colspan="COLUMNS.length" class="jobs-table__empty">
-                  No job posts to show. Tick <strong>Show archived</strong> if you archived something.
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </div>
+    <SortableTable
+      :columns="columns"
+      :rows="rows"
+      :row-key="(j) => j.id"
+      caption="All job posts."
+      :initial-sort="{ key: 'date', direction: 'desc' }"
+    >
+      <template #cell-title="{ row }">
+        <NuxtLink :to="`/admin/jobs/${row.id}`" class="link">{{ row.title }}</NuxtLink>
+        <span v-if="row.archivedAt" class="jobs-archived">Archived</span>
+      </template>
+      <template #cell-date="{ row }">{{ formatDateShort(row.date) }}</template>
+      <template #cell-rate="{ row }">{{ formatPeso(row.ratePhp) }}</template>
+      <template #cell-cleaner="{ row }">
+        <span v-if="cleanerName(row)">{{ cleanerName(row) }}</span>
+        <span v-else class="muted">Not assigned</span>
+      </template>
+      <template #cell-status="{ row }"><StatusChip :status="row.status" /></template>
+      <template #empty>
+        No job posts to show. Tick <strong>Show archived</strong> if you archived something.
+      </template>
+    </SortableTable>
+  </div>
 </template>
 
 <style scoped>
-.admin-page {
-  /* Width and padding come from the AppShell (1280 px). */
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.admin-page__title {
-  margin: 0;
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: var(--color-text);
-}
-
-.admin-page__filter {
+.jobs-filter {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   font-size: 14px;
   color: var(--color-text);
   cursor: pointer;
-  user-select: none;
   width: fit-content;
 }
-.admin-page__filter input {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--color-teal);
-}
-
-.jobs-card {
-  background-color: var(--color-card);
-  border: 1px solid var(--color-card-border);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card-lg);
-  overflow: hidden;
-}
-.jobs-card__scroll {
-  overflow-x: auto;
-}
-
-.jobs-table {
-  width: 100%;
-  min-width: 760px;
-  border-collapse: collapse;
-  font-size: 14px;
-}
-.jobs-table__caption {
-  position: absolute;
-  width: 1px; height: 1px;
-  padding: 0; margin: -1px; overflow: hidden;
-  clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
-}
-
-/* Header row — tinted, uppercase micro-label, letter-spaced. */
-.jobs-table thead th {
-  position: relative;
-  background-color: var(--color-table-head-bg);
-  border-bottom: 1px solid var(--color-card-border);
-  text-align: left;
-  padding: 0;
-  color: var(--color-text-soft);
-  font-weight: 700;
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-/* Current-sort column: thin teal accent underneath the th label. */
-.jobs-table thead th[aria-sort="ascending"]::after,
-.jobs-table thead th[aria-sort="descending"]::after {
-  content: '';
-  position: absolute;
-  left: 16px; right: 16px; bottom: -1px;
-  height: 2px;
-  background-color: var(--color-teal);
-  border-radius: 2px;
-}
-
-.jobs-table tbody td {
-  padding: 16px;
-  border-bottom: 1px solid var(--color-divider);
-  color: var(--color-text);
-  vertical-align: middle;
-  transition: background-color 120ms ease;
-}
-.jobs-table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-/* Zebra stripes for calm scanning + hover highlight on top. */
-.jobs-table tbody tr:nth-child(even) td {
-  background-color: var(--color-row-stripe);
-}
-.jobs-table tbody tr:hover td,
-.jobs-table tbody tr:focus-within td {
-  background-color: var(--color-row-hover);
-}
-
-/* Tabular numerals so money + dates line up on the vertical. */
-.jobs-table__num,
-.jobs-table__date {
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: 'tnum';
-  white-space: nowrap;
-}
-
-.jobs-table__sort {
-  all: unset;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 14px 16px;
-  width: 100%;
-  cursor: pointer;
-  font: inherit;
-  color: inherit;
-  text-transform: inherit;
-  letter-spacing: inherit;
-  transition: color 120ms ease;
-}
-.jobs-table__sort:hover {
-  color: var(--color-text);
-}
-.jobs-table__sort:focus-visible {
-  outline: 2px solid var(--color-teal);
-  outline-offset: -2px;
-}
-.jobs-table__sort--active {
-  color: var(--color-teal-dark);
-}
-.jobs-table__arrow {
-  font-size: 10px;
-  color: var(--color-text-soft);
-}
-.jobs-table__sort--active .jobs-table__arrow {
-  color: var(--color-teal);
-}
-
-.jobs-table__link {
-  color: var(--color-teal-dark);
-  font-weight: 600;
-  text-decoration: none;
-  border-radius: 2px;
-}
-.jobs-table__link:focus-visible {
-  outline: 2px solid var(--color-teal);
-  outline-offset: 2px;
-}
-.jobs-table__link:hover {
-  text-decoration: underline;
-}
-.jobs-table__muted {
-  color: var(--color-text-soft);
+.jobs-filter input { width: 18px; height: 18px; accent-color: var(--color-teal); }
+.jobs-archived {
+  margin-left: 8px;
+  font-size: 12px;
   font-style: italic;
-}
-.jobs-table__empty {
-  padding: 48px 16px;
-  text-align: center;
   color: var(--color-text-soft);
-}
-
-@media (max-width: 640px) {
-  .admin-page {
-    padding: 16px;
-  }
 }
 </style>
