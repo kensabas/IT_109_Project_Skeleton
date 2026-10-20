@@ -23,7 +23,7 @@ describe('withinRadius', () => {
   const origin = { lat: 0, lng: 0 }
   const places = [
     { id: 'near', lat: 0.05, lng: 0 },
-    { id: 'edge', lat: 0.09, lng: 0 },
+    { id: 'edge', lat: 0.0899, lng: 0 }, // 9.996 km
     { id: 'far', lat: 1, lng: 0 },
   ]
   it('keeps places within the radius (inclusive) and adds the distance', () => {
