@@ -18,7 +18,9 @@
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useJobsStore } from '~/stores/jobs'
-import { initialMockUsers, type MockUser } from '~/data/mockUsers'
+import type { MockUser } from '~/data/mockUsers'
+import { useCurrentUserStore } from '~/stores/currentUser'
+import { ACCOUNT_STATE_LABEL } from '~/utils/labels'
 import { JOB_STATUSES, type Job, type JobStatus } from '~/data/mockJobs'
 
 const route = useRoute()
@@ -27,11 +29,11 @@ const jobs = useJobsStore()
 const jobId = computed(() => String(route.params.id))
 const job = computed<Job | undefined>(() => jobs.getById(jobId.value))
 
-// Static copy of users for display lookups (same approach as the list page).
-const USERS: MockUser[] = initialMockUsers()
+// Users come from the store so account-state changes show up here.
+const userStore = useCurrentUserStore()
 function cleanerFor(j: Job): MockUser | undefined {
   if (!j.assignedCleanerId) return undefined
-  return USERS.find((u) => u.email === j.assignedCleanerId)
+  return userStore.users.find((u) => u.email === j.assignedCleanerId)
 }
 function initialsFor(name: string): string {
   const parts = name.trim().split(/\s+/).slice(0, 2)
@@ -215,7 +217,9 @@ function doArchive() {
                   <p class="cleaner__name">{{ cleanerFor(job)!.name }}</p>
                   <p class="cleaner__tags">
                     <span class="pill">Cleaner</span>
-                    <span class="pill pill--state">Activated</span>
+                    <span class="pill pill--state" :class="`pill--${cleanerFor(job)!.accountState}`">
+                      {{ ACCOUNT_STATE_LABEL[cleanerFor(job)!.accountState] }}
+                    </span>
                   </p>
                   <p class="cleaner__mobile">{{ cleanerFor(job)!.mobileNumber }}</p>
                   <p class="cleaner__profile">
