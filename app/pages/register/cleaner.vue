@@ -9,6 +9,7 @@
 <script setup lang="ts">
 import { nextTick, ref } from 'vue'
 import { useCurrentUserStore } from '~/stores/currentUser'
+import { homeFor } from '~/utils/access'
 import {
   validateCleanerSignUp,
   hasErrors,
@@ -74,7 +75,7 @@ async function onSubmit() {
     document.getElementById(CLEANER_FIELD_IDS.email)?.focus()
     return
   }
-  navigateTo('/welcome')
+  navigateTo(homeFor('cleaner'))
 }
 </script>
 

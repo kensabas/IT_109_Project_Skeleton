@@ -9,6 +9,7 @@
 <script setup lang="ts">
 import { nextTick, ref } from 'vue'
 import { useCurrentUserStore } from '~/stores/currentUser'
+import { homeFor } from '~/utils/access'
 import type { ClientType } from '~/data/mockUsers'
 import {
   validateClientSignUp,
@@ -89,7 +90,7 @@ async function onSubmit() {
     document.getElementById(CLIENT_FIELD_IDS.email)?.focus()
     return
   }
-  navigateTo('/welcome')
+  navigateTo(homeFor('client'))
 }
 </script>
 

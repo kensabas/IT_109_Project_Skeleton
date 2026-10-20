@@ -11,6 +11,7 @@
 <script setup lang="ts">
 import { nextTick, ref } from 'vue'
 import { useCurrentUserStore } from '~/stores/currentUser'
+import { homeFor } from '~/utils/access'
 import {
   validateLogin,
   hasErrors,
@@ -53,7 +54,7 @@ async function onSubmit() {
     formError.value = result.error
     return
   }
-  navigateTo('/welcome')
+  navigateTo(homeFor(currentUser.currentUser!.role))
 }
 </script>
 
