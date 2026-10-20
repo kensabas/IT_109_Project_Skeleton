@@ -96,6 +96,19 @@ function onStatusChange(e: Event) {
 const confirmingArchive = ref(false)
 function openConfirm() { confirmingArchive.value = true }
 function cancelConfirm() { confirmingArchive.value = false }
+// Restore (plan D3, unconfirmed Q13): no confirm step because it is
+// harmless and can be undone by archiving again.
+const restoreMessage = ref('')
+function doRestore() {
+  if (!job.value) return
+  const result = jobs.restoreJob(job.value.id)
+  restoreMessage.value = result.ok ? 'Job restored. It is back in the main list.' : result.error
+}
+
+useHead(() => ({
+  title: job.value ? `${job.value.title} | CleanLinis` : 'Job not found | CleanLinis',
+}))
+
 function doArchive() {
   if (!job.value) return
   jobs.archiveJob(job.value.id)
@@ -152,10 +165,17 @@ function doArchive() {
           >
             Archive job
           </BaseButton>
-          <p v-else class="detail-page__archived-note">
-            This job was archived on {{ fullDate(job.archivedAt.slice(0, 10)) }}.
-          </p>
+          <div v-else class="detail-page__archived">
+            <p class="detail-page__archived-note">
+              This job was archived on {{ fullDate(job.archivedAt.slice(0, 10)) }}.
+            </p>
+            <BaseButton type="button" class="detail-page__archive" @click="doRestore">
+              Restore job
+            </BaseButton>
+          </div>
         </div>
+
+        <p v-if="restoreMessage" class="detail-page__message" role="status">{{ restoreMessage }}</p>
 
         <!-- In-page archive confirm (NOT window.confirm) -->
         <div
@@ -166,7 +186,7 @@ function doArchive() {
         >
           <h2 id="archive-confirm-title" class="confirm-card__title">Archive this job?</h2>
           <p class="confirm-card__body">
-            Archived jobs are hidden from the main list. The record is kept and can still be viewed via "Show archived".
+            Archived jobs are hidden from the main list. The record is kept, can be viewed with "Show archived", and can be restored.
           </p>
           <div class="confirm-card__actions">
             <BaseButton type="button" class="confirm-card__btn" @click="doArchive">Yes, archive</BaseButton>
@@ -332,6 +352,8 @@ function doArchive() {
 .detail-page__title-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .detail-page__title { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.02em; color: var(--color-text); }
 .detail-page__archive { width: auto; min-width: 160px; }
+.detail-page__archived { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.detail-page__message { margin: 0; font-size: 14px; color: var(--color-text); }
 .detail-page__archived-note { margin: 0; font-size: 14px; color: var(--color-text-soft); font-style: italic; }
 
 /* Archive confirm card (in-page, NOT a native alert) */
