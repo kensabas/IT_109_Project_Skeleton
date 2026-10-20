@@ -77,12 +77,12 @@
   --color-tone-purple-bg: #E9E1F3;
   --color-tone-purple-fg: #3F2A63;
 
-  /* Chart colours: see the note above the chart rules at the end of this file. */
+  /* Chart colours: see the note near the end of this file. */
   --color-chart-single: #0E7C7B;
   --color-chart-1: #2A78D6;
   --color-chart-2: #EB6834;
-  --color-chart-3: #1BAF7A;
-  --color-chart-4: #EDA100;
+  --color-chart-3: #19A371;
+  --color-chart-4: #C08200;
 }
 
 *,
@@ -255,12 +255,14 @@ textarea.field__input { padding: 12px 14px; min-height: 120px; resize: vertical;
 .inline-check { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--color-text); width: fit-content; cursor: pointer; }
 .inline-check input { width: 18px; height: 18px; accent-color: var(--color-teal); }
 
-/* Chart colours (Wave 5.2). One-series charts use the brand teal.
- * Multi-series slots 1-4 come from the dataviz skill's validated
- * reference order; run through its validator on the white surface:
- * lightness, chroma, colour-blind separation (worst ΔE 9.1) and
- * normal-vision floor all PASS. Slots 3 and 4 are under 3:1 against
- * white, so every chart also shows a text legend and a data table. */
+/* Chart colours (Wave 5.2, darkened in polish C). One-series charts use
+ * the brand teal. Multi-series slots 1-4 follow the dataviz skill's
+ * reference order; slots 3 and 4 were darkened (#1BAF7A -> #19A371,
+ * #EDA100 -> #C08200) so every mark reaches 3:1 against white. The set
+ * passes the skill's palette validator on white (lightness, chroma,
+ * colour-blind separation worst dE 9.1, normal-vision floor, contrast).
+ * Charts still show a text legend and a data table. Checked by
+ * tests/chartColours.spec.ts. */
 
 /* Print / save as PDF (Wave 5.4): only the report content is printed. */
 @media print {
