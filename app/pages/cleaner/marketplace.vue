@@ -125,6 +125,6 @@ function distanceText(km: number | null): string {
 .job__facts dt { min-width: 76px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-soft); padding-top: 2px; }
 .job__facts dd { margin: 0; }
 .job__desc { margin: 0; font-size: 14px; line-height: 1.5; }
-.job__open { align-self: flex-start; }
+.job__open { align-self: flex-start; margin-top: auto; }
 @media (max-width: 400px) { .jobs { grid-template-columns: 1fr; } }
 </style>
