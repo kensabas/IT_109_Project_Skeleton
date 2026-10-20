@@ -4,6 +4,8 @@
   an optional sub-text line, and a centered 480 px card into which pages
   pass their form via the default slot.
 
+  The whole screen is the page's <main> landmark (I-24).
+
   The logo is decorative per the mockup brief, so it is hidden from
   screen readers (aria-hidden). The wordmark alone communicates the brand.
 -->
@@ -15,7 +17,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="auth-layout">
+  <main class="auth-layout">
     <header class="auth-layout__brand">
       <svg
         class="auth-layout__logo"
@@ -41,7 +43,7 @@ defineProps<{
     <section class="auth-layout__card">
       <slot />
     </section>
-  </div>
+  </main>
 </template>
 
 <style scoped>
