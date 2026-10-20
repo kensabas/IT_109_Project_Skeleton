@@ -278,6 +278,8 @@ textarea.field__input { padding: 12px 14px; min-height: 120px; resize: vertical;
   .shell__skip { display: none !important; }
   body { background: var(--color-card); }
   .card, .sortable, .chart, .stat { box-shadow: none !important; }
+  /* Keep each card, chart and table row whole on a page (I-26). */
+  .card, .chart, .stat, tr { break-inside: avoid; }
   .sortable__scroll { overflow: visible !important; }
 }
 
