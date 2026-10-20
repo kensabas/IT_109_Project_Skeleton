@@ -12,7 +12,8 @@
     "shots": "node scripts/shots.mjs",
     "flows": "node scripts/flows.mjs",
     "a11y": "node scripts/a11y.mjs",
-    "b2audit": "node scripts/b2audit.mjs"
+    "b2audit": "node scripts/b2audit.mjs",
+    "keys": "node scripts/keys.mjs"
   },
   "dependencies": {
     "@pinia/nuxt": "^1.0.3",
