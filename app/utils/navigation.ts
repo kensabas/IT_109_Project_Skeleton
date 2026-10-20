@@ -11,7 +11,14 @@ const NAV: Record<UserRole, NavItem[]> = {
     { label: 'Calendar', to: '/client/calendar' },
   ],
   cleaner: [{ label: 'Marketplace', to: '/cleaner/marketplace' }],
-  admin: [{ label: 'Job posts', to: '/admin/jobs' }],
+  admin: [
+    { label: 'Job posts', to: '/admin/jobs' },
+    { label: 'Requests', to: '/admin/requests' },
+    { label: 'Bookings', to: '/admin/bookings' },
+    { label: 'Accounts', to: '/admin/accounts' },
+    { label: 'Disputes', to: '/admin/disputes' },
+    { label: 'Calendar', to: '/admin/calendar' },
+  ],
 }
 
 export function navFor(role: UserRole): NavItem[] {
