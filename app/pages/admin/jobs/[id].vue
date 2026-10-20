@@ -19,6 +19,11 @@ definePageMeta({ layout: 'app' })
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useJobsStore } from '~/stores/jobs'
+import { useApplicationsStore } from '~/stores/applications'
+import type { Application } from '~/data/mockApplications'
+import type { TableColumn } from '~/components/SortableTable.vue'
+import { formatDateTime } from '~/utils/format'
+import { placeLabel } from '~/data/mockJobs'
 import type { MockUser } from '~/data/mockUsers'
 import { useCurrentUserStore } from '~/stores/currentUser'
 import { ACCOUNT_STATE_LABEL } from '~/utils/labels'
@@ -84,6 +89,40 @@ function doRestore() {
   if (!job.value) return
   const result = jobs.restoreJob(job.value.id)
   restoreMessage.value = result.ok ? 'Job restored. It is back in the main list.' : result.error
+}
+
+// Applicants and assignment (F-18, plan D1: admin picks an applicant).
+const applications = useApplicationsStore()
+const applicants = computed(() => (job.value ? applications.applicantsFor(job.value.id) : []))
+function applicantName(a: Application): string {
+  return userStore.findByEmail(a.cleanerEmail)?.name ?? a.cleanerEmail
+}
+const APPLICATION_RANK: Record<string, number> = { applied: 0, accepted: 1, declined: 2, cancelled: 3 }
+const applicantColumns: TableColumn<Application>[] = [
+  { key: 'name', label: 'Cleaner', value: (a) => applicantName(a) },
+  { key: 'approval', label: 'Approval', value: (a) => userStore.findByEmail(a.cleanerEmail)?.approvalStatus ?? '' },
+  { key: 'state', label: 'Account', value: (a) => userStore.findByEmail(a.cleanerEmail)?.accountState ?? '' },
+  { key: 'applied', label: 'Applied', value: (a) => a.appliedAt, type: 'date' },
+  { key: 'status', label: 'Application', value: (a) => APPLICATION_RANK[a.status] },
+  { key: 'actions', label: 'Actions', value: () => null, sortable: false },
+]
+const canAssign = computed(() => !!job.value && !job.value.archivedAt && !job.value.assignedCleanerId)
+
+const assignChoice = ref<Application | null>(null)
+const confirmingUnassign = ref(false)
+const assignMessage = ref<{ kind: 'ok' | 'error'; text: string } | null>(null)
+function doAssign() {
+  if (!job.value || !assignChoice.value) return
+  const name = applicantName(assignChoice.value)
+  const result = jobs.assignCleaner(job.value.id, assignChoice.value.cleanerEmail, userStore.currentUser)
+  assignMessage.value = result.ok ? { kind: 'ok', text: `${name} is now assigned. Other applicants were declined.` } : { kind: 'error', text: result.error }
+  assignChoice.value = null
+}
+function doUnassign() {
+  if (!job.value) return
+  const result = jobs.unassign(job.value.id, userStore.currentUser)
+  assignMessage.value = result.ok ? { kind: 'ok', text: 'The cleaner was removed. Applications are open again.' } : { kind: 'error', text: result.error }
+  confirmingUnassign.value = false
 }
 
 useHead(() => ({
@@ -179,6 +218,14 @@ function doArchive() {
                 <dd>{{ hhmm(job.startTime) }} to {{ hhmm(job.endTime) }}</dd>
               </div>
               <div class="info-list__row">
+                <dt>Area</dt>
+                <dd>{{ placeLabel(job) }}</dd>
+              </div>
+              <div class="info-list__row">
+                <dt>Request</dt>
+                <dd>{{ job.requestId ?? 'No request on file' }}</dd>
+              </div>
+              <div class="info-list__row">
                 <dt>Duration</dt>
                 <dd>{{ job.durationHours }} hours</dd>
               </div>
@@ -211,14 +258,19 @@ function doArchive() {
                     </a>
                   </p>
                   <p class="cleaner__profile">
-                    <!-- Placeholder — needs_your_attention #5 -->
-                    <NuxtLink to="#" data-placeholder="cleaner-profile" class="detail-page__link">
+                    <NuxtLink :to="`/admin/accounts/${encodeURIComponent(cleanerFor(job)!.email)}`" class="detail-page__link">
                       View cleaner profile
                     </NuxtLink>
                   </p>
+                  <p class="cleaner__profile">
+                    <button type="button" class="btn btn--secondary btn--small" @click="confirmingUnassign = true">Unassign cleaner</button>
+                  </p>
+                  <p class="cleaner__profile">
+                    <NuxtLink :to="{ path: '/admin/disputes', query: { jobId: job.id } }" class="detail-page__link">Open a dispute</NuxtLink>
+                  </p>
                 </div>
               </div>
-              <p v-else class="cleaner__none">Not assigned.</p>
+              <p v-else class="cleaner__none">Not assigned. Choose from the applicants below.</p>
             </section>
 
             <!-- Job status -->
@@ -254,6 +306,60 @@ function doArchive() {
             </section>
           </div>
         </div>
+
+        <p v-if="assignMessage" class="message" :class="`message--${assignMessage.kind}`" :role="assignMessage.kind === 'error' ? 'alert' : 'status'">
+          {{ assignMessage.text }}
+        </p>
+        <ConfirmPanel
+          :open="assignChoice !== null"
+          title="Assign this cleaner?"
+          confirm-label="Yes, assign"
+          @confirm="doAssign"
+          @cancel="assignChoice = null"
+        >
+          <p v-if="assignChoice">{{ applicantName(assignChoice) }} will be assigned to "{{ job.title }}". The other applicants will be declined.</p>
+        </ConfirmPanel>
+        <ConfirmPanel
+          :open="confirmingUnassign"
+          title="Remove the assigned cleaner?"
+          confirm-label="Yes, unassign"
+          @confirm="doUnassign"
+          @cancel="confirmingUnassign = false"
+        >
+          <p>The job post goes back to the marketplace and every application for it is open again.</p>
+        </ConfirmPanel>
+
+        <section class="applicants" aria-labelledby="applicants-title">
+          <h2 id="applicants-title" class="applicants__title">Applicants ({{ applicants.length }})</h2>
+          <SortableTable
+            :columns="applicantColumns"
+            :rows="applicants"
+            :row-key="(a) => a.id"
+            caption="Cleaners who applied to this job post."
+            :initial-sort="{ key: 'status', direction: 'asc' }"
+            empty-text="Nobody has applied yet."
+          >
+            <template #cell-name="{ row }">
+              <NuxtLink :to="`/admin/accounts/${encodeURIComponent(row.cleanerEmail)}`" class="link">{{ applicantName(row) }}</NuxtLink>
+            </template>
+            <template #cell-approval="{ row }"><StatusBadge kind="approval" :value="userStore.findByEmail(row.cleanerEmail)?.approvalStatus ?? 'pending'" /></template>
+            <template #cell-state="{ row }"><StatusBadge kind="account" :value="userStore.findByEmail(row.cleanerEmail)?.accountState ?? 'activated'" /></template>
+            <template #cell-applied="{ row }">{{ formatDateTime(row.appliedAt) }}</template>
+            <template #cell-status="{ row }"><StatusBadge kind="application" :value="row.status" /></template>
+            <template #cell-actions="{ row }">
+              <button
+                v-if="canAssign && row.status === 'applied'"
+                type="button"
+                class="btn btn--primary btn--small"
+                :aria-label="`Assign ${applicantName(row)}`"
+                @click="assignChoice = row"
+              >
+                Assign
+              </button>
+              <span v-else class="muted">No action</span>
+            </template>
+          </SortableTable>
+        </section>
       </template>
     </div>
 </template>
@@ -440,6 +546,9 @@ function doArchive() {
   outline: 2px solid var(--color-teal); outline-offset: 2px;
 }
 .status-change__error { margin: 0; font-size: 13px; color: var(--color-error); }
+
+.applicants { display: flex; flex-direction: column; gap: 12px; }
+.applicants__title { margin: 0; font-size: 18px; font-weight: 800; color: var(--color-text); }
 
 .detail-page__notfound {
   background-color: var(--color-card);
