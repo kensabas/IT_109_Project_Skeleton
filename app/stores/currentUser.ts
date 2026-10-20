@@ -15,7 +15,9 @@
 
 import { defineStore } from 'pinia'
 import { isoToday } from '../utils/dates'
-import { initialMockUsers, type MockUser, type NewUserInput } from '../data/mockUsers'
+import { initialMockUsers, type AccountState, type MockUser, type NewUserInput, type PinnedLocation } from '../data/mockUsers'
+import { ADMIN_ONLY, fail, isAdmin, OK, type ActionResult } from '../utils/result'
+import { useDocumentsStore } from './documents'
 
 interface State {
   currentUser: MockUser | null
@@ -103,6 +105,66 @@ export const useCurrentUserStore = defineStore('currentUser', {
       this.users.push(newUser)
       this.currentUser = newUser
       return { ok: true }
+    },
+
+    findByEmail(email: string): MockUser | undefined {
+      const needle = normalizeEmail(email)
+      return this.users.find((u) => normalizeEmail(u.email) === needle)
+    },
+
+    // F-05, F-14 — plan D6 (Q12 unconfirmed). Admins change states; an
+    // admin cannot change their own state (would lock them out).
+    setAccountState(email: string, state: AccountState, actor: MockUser | null): ActionResult {
+      if (!isAdmin(actor)) return fail(ADMIN_ONLY)
+      const user = this.findByEmail(email)
+      if (!user) return fail('Account not found.')
+      if (normalizeEmail(user.email) === normalizeEmail(actor!.email)) return fail('You cannot change your own account state.')
+      user.accountState = state
+      return OK
+    },
+
+    // F-03 — plan D7 (Q18 unconfirmed): approval needs all six documents
+    // approved by an admin.
+    approveCleaner(email: string, actor: MockUser | null): ActionResult {
+      if (!isAdmin(actor)) return fail(ADMIN_ONLY)
+      const user = this.findByEmail(email)
+      if (user?.role !== 'cleaner') return fail('Cleaner not found.')
+      if (!useDocumentsStore().allApproved(user.email)) {
+        return fail('All six documents must be approved before the cleaner can be approved.')
+      }
+      user.approvalStatus = 'approved'
+      return OK
+    },
+
+    rejectCleaner(email: string, actor: MockUser | null): ActionResult {
+      if (!isAdmin(actor)) return fail(ADMIN_ONLY)
+      const user = this.findByEmail(email)
+      if (user?.role !== 'cleaner') return fail('Cleaner not found.')
+      user.approvalStatus = 'rejected'
+      return OK
+    },
+
+    // F-24 — the cleaner's pinned location (plan D5).
+    setPinnedLocation(email: string, location: PinnedLocation): ActionResult {
+      const user = this.findByEmail(email)
+      if (user?.role !== 'cleaner') return fail('Only cleaners pin a location.')
+      user.pinnedLocation = { ...location }
+      return OK
+    },
+
+    // F-04 — only the main admin creates admin accounts (no registration).
+    createAdmin(input: Pick<MockUser, 'name' | 'email' | 'mobileNumber' | 'password'>, actor: MockUser | null): ActionResult {
+      if (!isAdmin(actor) || !actor!.isMainAdmin) return fail('Only the main admin can create admin accounts.')
+      if (this.findByEmail(input.email)) return fail(DUPLICATE_EMAIL_MESSAGE)
+      this.users.push({
+        ...input,
+        role: 'admin',
+        isMainAdmin: false,
+        accountState: 'activated',
+        approvalStatus: 'not-required',
+        registeredAt: isoToday(),
+      })
+      return OK
     },
   },
 })
