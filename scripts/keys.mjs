@@ -66,7 +66,15 @@ async function tabCycle(page) {
     const prev = stops[stops.length - 1]
     if (prev && prev.key === info.key && !info.isDate) {
       repeatsInARow++
-      if (repeatsInARow >= 3) { trapped = true; break }
+      if (repeatsInARow >= 3) {
+        // Headless Firefox does not wrap at the end of the page: focus stays
+        // on the last element. That is the end of the cycle, not a trap, if
+        // Shift+Tab can still move focus away.
+        await page.keyboard.press(ENGINE_NAME === 'webkit' ? 'Alt+Shift+Tab' : 'Shift+Tab')
+        const back = await page.evaluate(describeActive)
+        trapped = !back || back.key === info.key
+        break
+      }
     } else repeatsInARow = 0
     if (!prev || prev.key !== info.key) stops.push(info)
   }
@@ -81,7 +89,8 @@ async function tabCycle(page) {
 }
 
 async function checkSkipLink(page) {
-  await page.evaluate(() => document.activeElement?.blur())
+  // Start from a fresh page load, as a person arriving on the page would.
+  await page.reload({ waitUntil: 'networkidle' })
   await page.keyboard.press(TAB)
   const first = await page.evaluate(() => document.activeElement?.textContent?.trim())
   if (first !== 'Skip to main content') return `first stop is "${first}"`
