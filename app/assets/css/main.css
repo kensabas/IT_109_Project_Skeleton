@@ -274,3 +274,12 @@ textarea.field__input { padding: 12px 14px; min-height: 120px; resize: vertical;
   .card, .sortable, .chart, .stat { box-shadow: none !important; }
   .sortable__scroll { overflow: visible !important; }
 }
+
+/* WebKit (Safari) does not match :focus-visible when Tab moves into a
+ * date or time input, so those inputs draw the focus ring on :focus
+ * (I-22; screenshots in CLAUDE/screenshots/focus/). */
+input[type='date']:focus,
+input[type='time']:focus {
+  outline: 2px solid var(--color-teal);
+  outline-offset: 2px;
+}
