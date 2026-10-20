@@ -235,6 +235,8 @@ summary { padding-block: 4px; }
 .field__hint { margin: 0; font-size: 13px; color: var(--color-text-soft); }
 .field__input {
   min-height: var(--control-height-input);
+  /* WebKit draws native selects 26 px tall and ignores min-height (I-35). */
+  appearance: none;
   padding: 0 14px;
   font-family: inherit;
   font-size: 16px;
@@ -245,6 +247,14 @@ summary { padding-block: 4px; }
   width: 100%;
 }
 textarea.field__input { padding: 12px 14px; min-height: 120px; resize: vertical; }
+/* With appearance: none the select needs its own arrow (same SVG as SelectField). */
+select.field__input {
+  padding-right: 40px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%234A6663'><path d='M5.293 7.293a1 1 0 0 1 1.414 0L10 10.586l3.293-3.293a1 1 0 1 1 1.414 1.414l-4 4a1 1 0 0 1-1.414 0l-4-4a1 1 0 0 1 0-1.414Z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 20px 20px;
+}
 .field__input[aria-invalid='true'] { border-color: var(--color-error); }
 .field__error { margin: 0; font-size: 14px; color: var(--color-error); }
 .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
