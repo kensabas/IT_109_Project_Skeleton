@@ -8,7 +8,8 @@
 import { computed, ref } from 'vue'
 import { eventsInMonth, isoToday, monthGrid, monthTitle, shiftMonth, type MonthRef } from '~/utils/dates'
 import { formatDateShort, formatTime12h } from '~/utils/format'
-import type { StatusKind } from '~/utils/statusMeta'
+import { statusLabel, type StatusKind } from '~/utils/statusMeta'
+import type { TableColumn } from '~/components/SortableTable.vue'
 
 export interface CalendarEvent {
   id: string
@@ -41,6 +42,12 @@ const monthEvents = computed(() => eventsInMonth(props.events, shown.value.year,
 function eventsOn(iso: string): CalendarEvent[] {
   return monthEvents.value.filter((event) => event.date === iso)
 }
+
+const listColumns: TableColumn<CalendarEvent>[] = [
+  { key: 'title', label: 'Event', value: (e) => e.title },
+  { key: 'date', label: 'Date', value: (e) => e.date + (e.time ?? ''), type: 'date' },
+  { key: 'status', label: 'Status', value: (e) => (e.statusKind && e.statusValue ? statusLabel(e.statusKind, e.statusValue) : null) },
+]
 
 const WEEKDAYS = [
   { short: 'Sun', long: 'Sunday' },
@@ -106,16 +113,24 @@ const WEEKDAYS = [
 
     <div class="calendar__list">
       <h3 class="calendar__list-title">Events in {{ title }}</h3>
-      <ul v-if="monthEvents.length" class="calendar__list-items">
-        <li v-for="event in monthEvents" :key="event.id" class="calendar__list-item">
-          <span class="calendar__list-date">
-            {{ formatDateShort(event.date) }}<template v-if="event.time">, {{ formatTime12h(event.time) }}</template>
-          </span>
-          <NuxtLink :to="event.to" class="link">{{ event.title }}</NuxtLink>
-          <StatusBadge v-if="event.statusKind && event.statusValue" :kind="event.statusKind" :value="event.statusValue" />
-        </li>
-      </ul>
-      <p v-else class="muted">No events this month.</p>
+      <!-- The same events as a sortable premium table (B.2, F-08). -->
+      <SortableTable
+        :columns="listColumns"
+        :rows="monthEvents"
+        :row-key="(e) => e.id"
+        :caption="`Events in ${title}.`"
+        :initial-sort="{ key: 'date', direction: 'asc' }"
+        :min-width="420"
+        empty-text="No events this month."
+      >
+        <template #cell-date="{ row }">
+          {{ formatDateShort(row.date) }}<template v-if="row.time">, {{ formatTime12h(row.time) }}</template>
+        </template>
+        <template #cell-title="{ row }"><NuxtLink :to="row.to" class="link">{{ row.title }}</NuxtLink></template>
+        <template #cell-status="{ row }">
+          <StatusBadge v-if="row.statusKind && row.statusValue" :kind="row.statusKind" :value="row.statusValue" />
+        </template>
+      </SortableTable>
     </div>
   </section>
 </template>
@@ -152,8 +167,17 @@ const WEEKDAYS = [
   vertical-align: top;
   padding: 6px;
   border: 1px solid var(--color-divider);
+  transition: background-color 120ms ease;
 }
-.calendar__cell--outside { background-color: var(--color-row-stripe); }
+/* B.2 rules 8 to 10 on the month grid (D-28 re-check): zebra weeks, week
+ * hover / keyboard focus highlight, no divider under the last week. Days
+ * outside the month use the page background (darker than the stripe) and
+ * soft text, so they stay distinct from striped weeks. */
+.calendar__grid tbody tr:nth-child(even) td { background-color: var(--color-row-stripe); }
+.calendar__grid tbody td.calendar__cell--outside { background-color: var(--color-bg); }
+.calendar__grid tbody tr:hover td,
+.calendar__grid tbody tr:focus-within td { background-color: var(--color-row-hover); }
+.calendar__grid tbody tr:last-child td { border-bottom: none; }
 .calendar__cell--outside .calendar__day { color: var(--color-text-soft); }
 .calendar__cell--today { box-shadow: inset 0 0 0 2px var(--color-teal); }
 .calendar__day { font-size: 13px; font-weight: 700; color: var(--color-text); font-variant-numeric: tabular-nums; }
@@ -177,18 +201,6 @@ const WEEKDAYS = [
 .calendar__count { display: none; }
 
 .calendar__list-title { margin: 0 0 8px; font-size: 15px; font-weight: 700; color: var(--color-text); }
-.calendar__list-items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
-.calendar__list-item {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px 14px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--color-divider);
-  font-size: 14px;
-}
-.calendar__list-item:last-child { border-bottom: none; }
-.calendar__list-date { min-width: 190px; color: var(--color-text-soft); font-variant-numeric: tabular-nums; }
 
 @media (max-width: 640px) {
   .calendar { padding: 12px; }
