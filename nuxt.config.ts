@@ -16,6 +16,15 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
+  // Leaflet is loaded with a dynamic import on the map pages. Listing it
+  // here lets Vite pre-bundle it at start instead of discovering it on the
+  // first map visit and reloading the page.
+  vite: {
+    optimizeDeps: {
+      include: ['leaflet'],
+    },
+  },
+
   // Home route redirects to /login so new visitors land on the login
   // screen. There is no index page; Nitro handles the redirect at the
   // server layer.
