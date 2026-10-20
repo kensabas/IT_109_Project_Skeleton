@@ -103,8 +103,8 @@ await browser.close()
   await go(p, B + '/client/requests/req-001'); await p.click('button:has-text("Cancel request")'); await p.click('button:has-text("Yes, cancel request")')
   console.log(JSON.stringify(['client cancel blocked (cleaner assigned)', (await p.textContent('.message'))?.trim()]))
   await go(p, B + '/client/calendar'); await p.waitForSelector('#calendar-title')
-  const month = await p.textContent('#calendar-title'); const listItems = await p.locator('.calendar__list-item').count()
-  await p.click('button:has-text("Next month")'); const next = await p.textContent('#calendar-title'); const nextItems = await p.locator('.calendar__list-item').count()
+  const month = await p.textContent('#calendar-title'); const listItems = await p.locator('.calendar__list tbody tr:has(td:not([colspan]))').count()
+  await p.click('button:has-text("Next month")'); const next = await p.textContent('#calendar-title'); const nextItems = await p.locator('.calendar__list tbody tr:has(td:not([colspan]))').count()
   console.log(JSON.stringify(['client calendar', month, listItems, next, nextItems, errs.length, errs.slice(0, 3)]))
   await b.close()
 }
@@ -164,7 +164,7 @@ await browser.close()
   console.log(JSON.stringify(['admin disputes', bookingRows, pre, notes, (await p.textContent('.status-badge'))?.trim()]))
 
   await go(p, B + '/admin/calendar'); await p.waitForSelector('#calendar-title')
-  console.log(JSON.stringify(['admin calendar', await p.textContent('#calendar-title'), await p.locator('.calendar__list-item').count()]))
+  console.log(JSON.stringify(['admin calendar', await p.textContent('#calendar-title'), await p.locator('.calendar__list tbody tr:has(td:not([colspan]))').count()]))
 
   await p.click('text=Sign out'); await login('admin.staff@example.com', 'AdminStaff2026', '/admin/jobs')
   await go(p, B + '/admin/accounts/new')
@@ -247,7 +247,7 @@ await browser.close()
   console.log(JSON.stringify(['cleaner location', hasMap, attribution, tilesLoaded, pinLabel, saved, savedList]))
 
   await go(p, B + '/cleaner/calendar'); await p.waitForSelector('#calendar-title')
-  console.log(JSON.stringify(['cleaner calendar', await p.textContent('#calendar-title'), await p.locator('.calendar__list-item').count()]))
+  console.log(JSON.stringify(['cleaner calendar', await p.textContent('#calendar-title'), await p.locator('.calendar__list tbody tr:has(td:not([colspan]))').count()]))
 
   await p.click('text=Sign out'); await login('liza.fernandez@example.com', 'Sparkle2026')
   const notice = (await p.textContent('.message--info strong'))?.trim()
