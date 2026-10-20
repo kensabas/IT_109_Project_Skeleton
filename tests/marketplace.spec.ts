@@ -16,6 +16,8 @@ const jobs = [
   job({ id: 'nopin', lat: null, lng: null, ratePhp: 520, date: '2026-11-08', city: 'Pasig City', postedAt: '2026-10-20', description: 'Kitchen clean' }),
 ]
 const makati = { lat: 14.565, lng: 121.031 }
+// Tests that are not about distance pass no pin (null): Cebu is ~570 km
+// from the Makati pin, outside even the 50 km maximum radius.
 const all = (over: Partial<MarketplaceFilters> = {}): MarketplaceFilters => ({ ...emptyFilters(), radiusKm: RADIUS_MAX_KM, ...over })
 
 describe('emptyFilters', () => {
@@ -42,32 +44,32 @@ describe('filterMarketplace', () => {
     expect(result.every((r) => r.distanceKm === null)).toBe(true)
   })
   it('client name search (typed text, any case)', () => {
-    expect(filterMarketplace(jobs, all({ client: 'maria' }), makati).map((r) => r.job.id)).toEqual(['pasig'])
+    expect(filterMarketplace(jobs, all({ client: 'maria' }), null).map((r) => r.job.id)).toEqual(['pasig'])
   })
   it('keyword search in title and description', () => {
-    expect(filterMarketplace(jobs, all({ keyword: 'CLINIC' }), makati).map((r) => r.job.id)).toEqual(['cebu'])
+    expect(filterMarketplace(jobs, all({ keyword: 'CLINIC' }), null).map((r) => r.job.id)).toEqual(['cebu'])
   })
   it('date range', () => {
-    expect(filterMarketplace(jobs, all({ dateFrom: '2026-10-27', dateTo: '2026-10-31' }), makati).map((r) => r.job.id).sort()).toEqual(['cebu', 'pasig'])
+    expect(filterMarketplace(jobs, all({ dateFrom: '2026-10-27', dateTo: '2026-10-31' }), null).map((r) => r.job.id).sort()).toEqual(['cebu', 'pasig'])
   })
   it('time of day range on the start time', () => {
-    expect(filterMarketplace(jobs, all({ timeFrom: '07:00', timeTo: '12:00' }), makati).map((r) => r.job.id).sort()).toEqual(['nopin', 'pasig'])
+    expect(filterMarketplace(jobs, all({ timeFrom: '07:00', timeTo: '12:00' }), null).map((r) => r.job.id).sort()).toEqual(['nopin', 'pasig'])
   })
   it('rate range', () => {
-    expect(filterMarketplace(jobs, all({ rateMin: '500', rateMax: '800' }), makati).map((r) => r.job.id).sort()).toEqual(['cebu', 'nopin'])
+    expect(filterMarketplace(jobs, all({ rateMin: '500', rateMax: '800' }), null).map((r) => r.job.id).sort()).toEqual(['cebu', 'nopin'])
   })
   it('duration range', () => {
-    expect(filterMarketplace(jobs, all({ durationMin: '4' }), makati).map((r) => r.job.id)).toEqual(['pasig'])
+    expect(filterMarketplace(jobs, all({ durationMin: '4' }), null).map((r) => r.job.id)).toEqual(['pasig'])
   })
   it('area (city)', () => {
-    expect(filterMarketplace(jobs, all({ city: 'Pasig City' }), makati).map((r) => r.job.id).sort()).toEqual(['nopin', 'pasig'])
+    expect(filterMarketplace(jobs, all({ city: 'Pasig City' }), null).map((r) => r.job.id).sort()).toEqual(['nopin', 'pasig'])
   })
   it('sorts by highest rate, soonest and newest', () => {
-    expect(filterMarketplace(jobs, all({ sort: 'rate' }), makati).map((r) => r.job.id)).toEqual(['pasig', 'cebu', 'nopin', 'near'])
-    expect(filterMarketplace(jobs, all({ sort: 'soonest' }), makati).map((r) => r.job.id)).toEqual(['near', 'pasig', 'cebu', 'nopin'])
-    expect(filterMarketplace(jobs, all({ sort: 'newest' }), makati).map((r) => r.job.id)).toEqual(['nopin', 'cebu', 'pasig', 'near'])
+    expect(filterMarketplace(jobs, all({ sort: 'rate' }), null).map((r) => r.job.id)).toEqual(['pasig', 'cebu', 'nopin', 'near'])
+    expect(filterMarketplace(jobs, all({ sort: 'soonest' }), null).map((r) => r.job.id)).toEqual(['near', 'pasig', 'cebu', 'nopin'])
+    expect(filterMarketplace(jobs, all({ sort: 'newest' }), null).map((r) => r.job.id)).toEqual(['nopin', 'cebu', 'pasig', 'near'])
   })
   it('ignores range fields that are not numbers', () => {
-    expect(filterMarketplace(jobs, all({ rateMin: 'abc' }), makati).length).toBe(4)
+    expect(filterMarketplace(jobs, all({ rateMin: 'abc' }), null).length).toBe(4)
   })
 })
