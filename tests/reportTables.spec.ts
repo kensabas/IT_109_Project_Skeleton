@@ -128,3 +128,17 @@ describe('chart helpers', () => {
     expect(summarise([{ label: 'Mon', value: 0 }], 'requests')).toBe('No requests in this period.')
   })
 })
+
+import { axisLabelIndexes } from '../app/utils/chartScale'
+describe('axisLabelIndexes — x-axis labels never crowd (I-20)', () => {
+  it('31 days: every 7th, and not the last when it is too close', () => {
+    expect(axisLabelIndexes(31)).toEqual([0, 7, 14, 21, 28])
+  })
+  it('12 months: every 3rd plus the last when there is room', () => {
+    expect(axisLabelIndexes(12)).toEqual([0, 3, 6, 9, 11])
+  })
+  it('few points: all labelled', () => {
+    expect(axisLabelIndexes(3)).toEqual([0, 1, 2])
+    expect(axisLabelIndexes(7)).toEqual([0, 2, 4, 6])
+  })
+})

@@ -17,3 +17,16 @@ export function summarise(points: Point[], unit: string): string {
   const top = points.reduce((best, p) => (p.value > best.value ? p : best))
   return `${total} ${unit} in total. Highest: ${top.label} (${top.value}).`
 }
+
+const MAX_AXIS_LABELS = 5
+
+// Which points get an x-axis label: every nth point, plus the last one
+// only when it is not crowded by the previous labelled point (I-20).
+export function axisLabelIndexes(count: number): number[] {
+  const every = Math.max(1, Math.ceil(count / MAX_AXIS_LABELS))
+  const indexes: number[] = []
+  for (let i = 0; i < count; i += every) indexes.push(i)
+  const last = count - 1
+  if (last > 0 && !indexes.includes(last) && last % every > every / 2) indexes.push(last)
+  return indexes
+}
