@@ -10,6 +10,7 @@
 import { nextTick, ref } from 'vue'
 import { useCurrentUserStore } from '~/stores/currentUser'
 import { homeFor } from '~/utils/access'
+import { DOCUMENT_TYPES, DOCUMENT_TYPE_LABEL } from '~/data/mockDocuments'
 import {
   validateCleanerSignUp,
   hasErrors,
@@ -136,12 +137,7 @@ async function onSubmit() {
       <NoticeBox title="Before you apply">
         <p>You will need the following six documents, and your account must be approved before you can apply to jobs.</p>
         <ul>
-          <li>Birth certificate</li>
-          <li>NBI clearance</li>
-          <li>Police clearance</li>
-          <li>Valid government-issued ID</li>
-          <li>BIR</li>
-          <li>Medical certificate / fit-to-work</li>
+          <li v-for="type in DOCUMENT_TYPES" :key="type">{{ DOCUMENT_TYPE_LABEL[type] }}</li>
         </ul>
       </NoticeBox>
 
