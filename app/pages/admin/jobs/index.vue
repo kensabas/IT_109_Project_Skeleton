@@ -4,9 +4,10 @@
   `aria-sort` on the matching `<th>` reflects the current column +
   direction. Status is a <StatusChip> (text + colour, not colour only).
 
-  No route guard, no admin login yet — see needs_your_attention #4.
+  Wrapped in the AppShell; the route guard limits it to admins (Wave 1).
 -->
 <script setup lang="ts">
+definePageMeta({ layout: 'app' })
 import { computed, ref } from 'vue'
 import { useJobsStore } from '~/stores/jobs'
 import { initialMockUsers, type MockUser } from '~/data/mockUsers'
@@ -97,25 +98,7 @@ const COLUMNS: { key: ColumnKey; label: string }[] = [
 </script>
 
 <template>
-  <div class="admin-shell">
-    <header class="admin-shell__header">
-      <div class="admin-shell__brand">
-        <svg
-          class="admin-shell__logo"
-          width="28" height="28" viewBox="0 0 36 36"
-          aria-hidden="true" focusable="false"
-        >
-          <rect x="0" y="0" width="36" height="36" rx="8" fill="var(--color-teal)" />
-          <path d="M18 7 L20 16 L29 18 L20 20 L18 29 L16 20 L7 18 L16 16 Z" fill="#FFFFFF" />
-          <circle cx="29" cy="29" r="3.5" fill="var(--color-accent)" />
-        </svg>
-        <span class="admin-shell__wordmark">CleanLinis</span>
-        <span class="admin-shell__tag" aria-label="Admin area">Admin</span>
-      </div>
-      <p class="admin-shell__who">Signed in as Main admin</p>
-    </header>
-
-    <main class="admin-page">
+    <div class="admin-page">
       <h1 class="admin-page__title">Job posts</h1>
 
       <label class="admin-page__filter">
@@ -178,62 +161,12 @@ const COLUMNS: { key: ColumnKey; label: string }[] = [
           </table>
         </div>
       </section>
-    </main>
-  </div>
+    </div>
 </template>
 
 <style scoped>
-.admin-shell {
-  min-height: 100vh;
-  background-color: var(--color-bg);
-}
-
-.admin-shell__header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 16px 24px;
-  background-color: var(--color-card);
-  border-bottom: 1px solid var(--color-card-border);
-}
-
-.admin-shell__brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.admin-shell__wordmark {
-  font-size: 18px;
-  font-weight: 800;
-  color: var(--color-text);
-  letter-spacing: -0.01em;
-}
-
-.admin-shell__tag {
-  padding: 3px 10px;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--color-teal-dark);
-  background-color: var(--color-card);
-  border: 1px solid var(--color-card-border);
-  border-radius: 999px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.admin-shell__who {
-  margin: 0;
-  font-size: 13px;
-  color: var(--color-text-soft);
-}
-
 .admin-page {
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 24px;
+  /* Width and padding come from the AppShell (1280 px). */
   display: flex;
   flex-direction: column;
   gap: 16px;
