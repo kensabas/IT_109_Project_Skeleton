@@ -4,7 +4,7 @@
 // CLAUDE/screenshots/report.json so problems are not missed.
 //
 // Usage: node scripts/shots.mjs [baseUrl] [nameFilter]
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { chromium } from 'playwright'
 import { ROUTES, SIGN_IN_AS } from './routes.mjs'
 
@@ -14,6 +14,10 @@ const WIDTHS = [1280, 768, 375]
 const HEIGHT_FOR_WIDTH = { 1280: 800, 768: 1024, 375: 812 }
 const OUT_DIR = 'CLAUDE/screenshots'
 const SESSION_KEY = 'cleanlinis:session'
+const SCHEMA_KEY = 'cleanlinis:schema'
+// Read the app's schema version so the persist plugin keeps the injected
+// session (it clears saved data written under another version).
+const SCHEMA_VERSION = readFileSync('app/utils/persistence.ts', 'utf8').match(/SCHEMA_VERSION = (\d+)/)[1]
 
 mkdirSync(OUT_DIR, { recursive: true })
 const browser = await chromium.launch()
@@ -26,13 +30,14 @@ for (const route of ROUTES.filter((r) => r.name.includes(NAME_FILTER))) {
     })
     const email = route.role ? SIGN_IN_AS[route.role] : null
     await context.addInitScript(
-      ([key, value]) => {
+      ([key, value, schemaKey, schemaVersion]) => {
         if (value && !window.sessionStorage.getItem('shots-seeded')) {
+          window.localStorage.setItem(schemaKey, schemaVersion)
           window.localStorage.setItem(key, value)
           window.sessionStorage.setItem('shots-seeded', '1')
         }
       },
-      [SESSION_KEY, email],
+      [SESSION_KEY, email, SCHEMA_KEY, SCHEMA_VERSION],
     )
     const page = await context.newPage()
     const errors = []
@@ -48,6 +53,7 @@ for (const route of ROUTES.filter((r) => r.name.includes(NAME_FILTER))) {
     const file = `${OUT_DIR}/${route.name}_${width}.png`
     await page.screenshot({ path: file, fullPage: true })
     const finalPath = new URL(page.url()).pathname
+    if (finalPath !== route.path) errors.push(`redirected to ${finalPath}`)
     const h1Count = await page.locator('h1').count()
     const overflowX = await page.evaluate(
       () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
