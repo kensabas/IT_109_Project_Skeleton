@@ -176,5 +176,6 @@ function display(value: unknown): string {
   font-feature-settings: 'tnum';
   white-space: nowrap;
 }
-.sortable__empty { padding: 48px 16px !important; text-align: center; color: var(--color-text-soft); }
+/* Same specificity as the body-cell rule above, so the soft colour wins (B.2 rule 12). */
+.sortable__table tbody td.sortable__empty { padding: 48px 16px; text-align: center; color: var(--color-text-soft); }
 </style>
