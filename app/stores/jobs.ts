@@ -9,6 +9,11 @@
 
 import { defineStore } from 'pinia'
 import { initialMockJobs, JOB_STATUSES, type Job, type JobStatus } from '../data/mockJobs'
+import type { ClientRequest } from '../data/mockRequests'
+import type { MockUser } from '../data/mockUsers'
+import { ADMIN_ONLY, fail, isAdmin, nextId, OK, type ActionResult } from '../utils/result'
+import { isoToday } from '../utils/dates'
+import { useApplicationsStore } from './applications'
 
 interface State {
   jobs: Job[]
@@ -30,6 +35,11 @@ export const useJobsStore = defineStore('jobs', {
         return state.jobs.filter((j) => j.archivedAt === null)
       }
     },
+
+    // Plan D11 (Q11 unconfirmed): a booking is a live job post that has an
+    // assigned cleaner.
+    bookings: (state): Job[] =>
+      state.jobs.filter((j) => j.archivedAt === null && j.assignedCleanerId !== null),
   },
 
   actions: {
@@ -52,6 +62,62 @@ export const useJobsStore = defineStore('jobs', {
       if (job.archivedAt === null) return { ok: false, error: 'This job is not archived.' }
       job.archivedAt = null
       return { ok: true }
+    },
+
+    // F-13: the system publishes an approved request as a job post.
+    publishFromRequest(request: ClientRequest): Job {
+      const job: Job = {
+        id: nextId('job', this.jobs.map((j) => j.id)),
+        title: request.title,
+        clientName: request.clientName,
+        ratePhp: request.ratePhp,
+        date: request.date,
+        startTime: request.startTime,
+        endTime: request.endTime,
+        durationHours: request.durationHours,
+        description: request.description,
+        status: 'scheduled',
+        assignedCleanerId: null,
+        archivedAt: null,
+        barangay: request.barangay,
+        city: request.city,
+        // Without a pin the post has no coordinates of its own; the
+        // marketplace then cannot work out a distance (shown as unknown).
+        lat: request.lat ?? Number.NaN,
+        lng: request.lng ?? Number.NaN,
+        requestId: request.id,
+        clientEmail: request.clientEmail,
+        postedAt: isoToday(),
+      }
+      this.jobs.push(job)
+      return job
+    },
+
+    // Plan D1 (Q3 unconfirmed): the admin picks the cleaner from the people
+    // who applied. The other applicants are declined.
+    assignCleaner(jobId: string, cleanerEmail: string, actor: MockUser | null): ActionResult {
+      if (!isAdmin(actor)) return fail(ADMIN_ONLY)
+      const job = this.jobs.find((j) => j.id === jobId)
+      if (!job) return fail('Job not found.')
+      if (job.archivedAt) return fail('This job post is archived. Restore it first.')
+      const applications = useApplicationsStore()
+      const pick = applications.applications.find(
+        (a) => a.jobId === jobId && a.cleanerEmail === cleanerEmail && a.status === 'applied',
+      )
+      if (!pick) return fail('Only a cleaner who applied to this job post can be assigned.')
+      job.assignedCleanerId = cleanerEmail
+      applications.settleAfterAssign(jobId, cleanerEmail)
+      return OK
+    },
+
+    unassign(jobId: string, actor: MockUser | null): ActionResult {
+      if (!isAdmin(actor)) return fail(ADMIN_ONLY)
+      const job = this.jobs.find((j) => j.id === jobId)
+      if (!job) return fail('Job not found.')
+      if (!job.assignedCleanerId) return fail('No cleaner is assigned.')
+      job.assignedCleanerId = null
+      useApplicationsStore().reopenForJob(jobId)
+      return OK
     },
 
     setStatus(id: string, status: JobStatus): StoreResult {
