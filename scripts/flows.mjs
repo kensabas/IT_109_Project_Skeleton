@@ -22,3 +22,22 @@ async function fresh() { const c = await browser.newContext(); const p = await c
 { const { c, p } = await fresh(); await p.goto(B + '/login'); await p.fill('#login-email', 'admin.main@example.com'); await p.fill('#login-password', 'nope'); await p.click('button[type=submit]'); out.push(['wrong password', await p.textContent('.login-form__error')]); await c.close() }
 for (const row of out) console.log(JSON.stringify(row))
 await browser.close()
+
+// Wave 1.6 — admin jobs table sorts with header buttons and aria-sort.
+{
+  const browser2 = await chromium.launch()
+  const c = await browser2.newContext(); const p = await c.newPage(); const errs = []
+  p.on('console', (m) => { if (['error', 'warning'].includes(m.type())) errs.push(m.text()) })
+  await p.goto(B + '/login'); await p.fill('#login-email', 'admin.main@example.com'); await p.fill('#login-password', 'AdminMain2026'); await p.click('button[type=submit]'); await p.waitForURL('**/admin/jobs')
+  const firstBefore = await p.locator('tbody tr').first().locator('td').first().innerText()
+  await p.click('th >> text=Job')
+  const ariaAfter = await p.getAttribute('th:has-text("Job")', 'aria-sort')
+  const firstAfter = await p.locator('tbody tr').first().locator('td').first().innerText()
+  await p.click('th >> text=Job')
+  const ariaAfter2 = await p.getAttribute('th:has-text("Job")', 'aria-sort')
+  const rowsNoArchived = await p.locator('tbody tr').count()
+  await p.check('text=Show archived')
+  const rowsWithArchived = await p.locator('tbody tr').count()
+  console.log(JSON.stringify(['admin jobs sort', firstBefore, ariaAfter, firstAfter, ariaAfter2, rowsNoArchived, rowsWithArchived, errs.length]))
+  await browser2.close()
+}
