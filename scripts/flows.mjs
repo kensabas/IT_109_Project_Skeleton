@@ -161,3 +161,39 @@ await browser.close()
   console.log(JSON.stringify(['regular admin create admin', (await p.textContent('.card strong'))?.trim(), errs.length, errs.slice(0, 3)]))
   await b.close()
 }
+
+// Wave 5 — reports: figures, period change, tabs by keyboard, CSV download.
+{
+  const b = await chromium.launch()
+  const c = await b.newContext({ acceptDownloads: true }); const p = await c.newPage(); const errs = []
+  p.on('console', (m) => { if (['error', 'warning'].includes(m.type())) errs.push(m.text()) })
+  p.on('pageerror', (e) => errs.push(e.message))
+  await p.goto(B + '/login'); await p.fill('#login-email', 'admin.staff@example.com'); await p.fill('#login-password', 'AdminStaff2026'); await p.click('button[type=submit]'); await p.waitForURL('**/admin/jobs')
+  await p.goto(B + '/admin/reports'); await p.waitForSelector('.stat')
+  const meta = (await p.textContent('.report-meta'))?.replace(/\s+/g, ' ').trim()
+  const firstCard = (await p.locator('.stat').first().innerText()).replace(/\n/g, ' | ')
+  const highlights = await p.locator('.highlights li').allTextContents()
+  const charts = await p.locator('svg[role=img]').count()
+  await p.selectOption('#report-kind', 'yearly'); const yearly = (await p.locator('.stat').first().innerText()).replace(/\n/g, ' | ')
+  const download = p.waitForEvent('download'); await p.click('button:has-text("Download CSV")'); const file = await download
+  const csvPath = await file.path(); const { readFileSync } = await import('node:fs'); const csvFirstLine = readFileSync(csvPath, 'utf8').split('\r\n')[0]
+  await p.focus('#tab-admin'); await p.keyboard.press('ArrowRight')
+  const focusedTab = await p.evaluate(() => document.activeElement?.id); const cleanerRows = await p.locator('#panel-cleaners tbody tr').count()
+  await p.keyboard.press('ArrowRight'); const clientRows = await p.locator('#panel-clients tbody tr').count()
+  console.log(JSON.stringify(['reports', meta, firstCard, highlights, charts, yearly, file.suggestedFilename(), csvFirstLine, focusedTab, cleanerRows, clientRows, errs.length, errs.slice(0, 3)]))
+  await b.close()
+}
+
+// Wave 5.4 — print stylesheet: only the report prints (checked with print media emulation + a PDF).
+{
+  const b = await chromium.launch()
+  const p = await (await b.newContext()).newPage()
+  await p.goto(B + '/login'); await p.fill('#login-email', 'admin.staff@example.com'); await p.fill('#login-password', 'AdminStaff2026'); await p.click('button[type=submit]'); await p.waitForURL('**/admin/jobs')
+  await p.goto(B + '/admin/reports'); await p.waitForSelector('.stat')
+  await p.emulateMedia({ media: 'print' })
+  const hidden = await p.evaluate(() => ['.shell__header', '.shell__footer', '.filters', '.tabs'].map((s) => getComputedStyle(document.querySelector(s)).display))
+  const { mkdirSync } = await import('node:fs'); mkdirSync('CLAUDE/screenshots', { recursive: true })
+  await p.pdf({ path: 'CLAUDE/screenshots/admin-reports_print.pdf', format: 'A4' })
+  console.log(JSON.stringify(['reports print', hidden, await p.isVisible('h1'), 'CLAUDE/screenshots/admin-reports_print.pdf']))
+  await b.close()
+}

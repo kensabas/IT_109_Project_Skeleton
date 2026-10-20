@@ -35,4 +35,5 @@ export const ROUTES = [
   { name: 'admin-dispute-detail', path: '/admin/disputes/dsp-001', role: 'admin' },
   { name: 'admin-dispute-not-found', path: '/admin/disputes/dsp-404', role: 'admin' },
   { name: 'admin-calendar', path: '/admin/calendar', role: 'admin' },
+  { name: 'admin-reports', path: '/admin/reports', role: 'admin' },
 ]
