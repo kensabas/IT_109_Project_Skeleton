@@ -130,11 +130,13 @@ const WEEKDAYS = [
   display: flex;
   flex-direction: column;
   gap: 16px;
+  /* B.2 rule 2: rounded corners clip their content. */
+  overflow: hidden;
 }
 .calendar__bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
 .calendar__title { margin: 0; font-size: 20px; font-weight: 800; color: var(--color-text); }
 .calendar__scroll { overflow-x: auto; }
-.calendar__grid { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.calendar__grid { width: 100%; min-width: 280px; border-collapse: collapse; table-layout: fixed; }
 .calendar__grid th {
   padding: 8px 4px;
   font-size: 11px;
