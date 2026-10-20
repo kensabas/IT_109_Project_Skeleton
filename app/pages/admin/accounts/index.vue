@@ -128,5 +128,5 @@ const STATE_MEANING: Record<AccountState, string> = {
 
 <style scoped>
 .filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 320px)); gap: 16px; }
-.row-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.row-actions { display: flex; flex-wrap: nowrap; gap: 6px; }
 </style>
