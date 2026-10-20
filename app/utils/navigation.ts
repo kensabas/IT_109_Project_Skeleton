@@ -10,7 +10,13 @@ const NAV: Record<UserRole, NavItem[]> = {
     { label: 'New request', to: '/client/requests/new' },
     { label: 'Calendar', to: '/client/calendar' },
   ],
-  cleaner: [{ label: 'Marketplace', to: '/cleaner/marketplace' }],
+  cleaner: [
+    { label: 'Marketplace', to: '/cleaner/marketplace' },
+    { label: 'My applications', to: '/cleaner/applications' },
+    { label: 'My documents', to: '/cleaner/documents' },
+    { label: 'My location', to: '/cleaner/location' },
+    { label: 'Calendar', to: '/cleaner/calendar' },
+  ],
   admin: [
     { label: 'Job posts', to: '/admin/jobs' },
     { label: 'Requests', to: '/admin/requests' },
