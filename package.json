@@ -14,7 +14,8 @@
     "a11y": "node scripts/a11y.mjs",
     "b2audit": "node scripts/b2audit.mjs",
     "keys": "node scripts/keys.mjs",
-    "aria": "node scripts/aria.mjs"
+    "aria": "node scripts/aria.mjs",
+    "mobile": "node scripts/mobile.mjs"
   },
   "dependencies": {
     "@pinia/nuxt": "^1.0.3",
