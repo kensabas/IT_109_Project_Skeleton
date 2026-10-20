@@ -3,6 +3,13 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 
+  // The mock session and data live in the browser (localStorage), which
+  // the server cannot read. Rendering on the server would show every
+  // protected page as signed out and then disagree with the browser
+  // (hydration mismatch), so pages render in the browser only. Midterm
+  // mock decision, logged in CLAUDE/for_ken_review.md.
+  ssr: false,
+
   modules: ['@pinia/nuxt'],
 
   css: ['~/assets/css/main.css'],
