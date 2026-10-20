@@ -187,6 +187,11 @@ a {
 }
 .link:hover { text-decoration: underline; }
 
+/* Tap targets at least 24 px tall (WCAG 2.5.8) for links that stand on
+ * their own, summary toggles and checkbox / radio labels (I-25). */
+.link { display: inline-block; padding-block: 3px; }
+summary { padding-block: 4px; }
+
 /* Page layout helpers. */
 .page-stack { display: flex; flex-direction: column; gap: 18px; }
 
@@ -210,7 +215,8 @@ a {
 }
 
 /* Two-column info list (approved pattern items 16-19). */
-.info-list { margin: 0; display: grid; grid-template-columns: 120px 1fr; column-gap: 12px; }
+/* minmax(0, 1fr) lets long values (emails) wrap instead of widening the page. */
+.info-list { margin: 0; display: grid; grid-template-columns: 120px minmax(0, 1fr); column-gap: 12px; }
 .info-list__row { display: contents; }
 .info-list__row > dt,
 .info-list__row > dd { padding: 10px 0; border-bottom: 1px solid var(--color-divider); }
@@ -220,7 +226,7 @@ a {
   font-size: 11px; font-weight: 700; color: var(--color-text-soft);
   text-transform: uppercase; letter-spacing: 0.08em; align-self: center;
 }
-.info-list dd { margin: 0; font-size: 14px; color: var(--color-text); font-variant-numeric: tabular-nums; }
+.info-list dd { margin: 0; font-size: 14px; color: var(--color-text); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 
 /* Form fields for inputs that TextField does not cover (date, time,
  * number, textarea, select, file, range). */
@@ -252,7 +258,7 @@ textarea.field__input { padding: 12px 14px; min-height: 120px; resize: vertical;
 .muted { color: var(--color-text-soft); font-style: italic; }
 
 /* Checkbox with its label on one line (filters). */
-.inline-check { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--color-text); width: fit-content; cursor: pointer; }
+.inline-check { display: inline-flex; align-items: center; gap: 8px; min-height: 24px; font-size: 14px; color: var(--color-text); width: fit-content; cursor: pointer; }
 .inline-check input { width: 18px; height: 18px; accent-color: var(--color-teal); }
 
 /* Chart colours (Wave 5.2, darkened in polish C). One-series charts use

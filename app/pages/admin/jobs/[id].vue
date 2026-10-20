@@ -368,6 +368,9 @@ function doArchive() {
 .detail-page__back { margin: 0; }
 .detail-page__back-link,
 .detail-page__link {
+  /* Tap target at least 24 px tall (I-25). */
+  display: inline-block;
+  padding-block: 3px;
   color: var(--color-teal-dark);
   font-weight: 600;
   text-decoration: none;
