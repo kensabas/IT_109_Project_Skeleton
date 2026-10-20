@@ -123,3 +123,38 @@ describe('toggleDirection', () => {
     expect(toggleDirection('desc')).toBe('asc')
   })
 })
+
+// Wave 1.6 [F-08] — helpers behind the shared SortableTable.
+import { sortRowsEmptyLast, nextSort, ariaSortFor } from '../app/utils/sortRows'
+
+describe('sortRowsEmptyLast — empty values stay at the end both ways', () => {
+  const people = [{ n: 'Rosa' }, { n: null }, { n: 'Ana' }, { n: '' }, { n: 'Pedro' }]
+  it('ascending', () => {
+    expect(sortRowsEmptyLast(people, (r) => r.n, 'asc').map((r) => r.n)).toEqual(['Ana', 'Pedro', 'Rosa', null, ''])
+  })
+  it('descending', () => {
+    expect(sortRowsEmptyLast(people, (r) => r.n, 'desc').map((r) => r.n)).toEqual(['Rosa', 'Pedro', 'Ana', null, ''])
+  })
+  it('sorts numbers numerically', () => {
+    const rows = [{ v: 10 }, { v: 9 }, { v: undefined }, { v: 100 }]
+    expect(sortRowsEmptyLast(rows, (r) => r.v, 'asc').map((r) => r.v)).toEqual([9, 10, 100, undefined])
+  })
+})
+
+describe('nextSort — header button clicks', () => {
+  it('clicking the current column flips the direction', () => {
+    expect(nextSort({ key: 'date', direction: 'asc' }, 'date')).toEqual({ key: 'date', direction: 'desc' })
+  })
+  it('clicking another column sorts it ascending', () => {
+    expect(nextSort({ key: 'date', direction: 'desc' }, 'rate')).toEqual({ key: 'rate', direction: 'asc' })
+  })
+})
+
+describe('ariaSortFor', () => {
+  it('returns ascending / descending for the current column, none otherwise', () => {
+    const state = { key: 'date', direction: 'asc' as const }
+    expect(ariaSortFor(state, 'date')).toBe('ascending')
+    expect(ariaSortFor({ ...state, direction: 'desc' }, 'date')).toBe('descending')
+    expect(ariaSortFor(state, 'rate')).toBe('none')
+  })
+})
