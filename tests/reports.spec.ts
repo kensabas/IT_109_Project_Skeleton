@@ -46,7 +46,11 @@ describe('inPeriod', () => {
 })
 
 describe('trendBuckets', () => {
-  it('monthly → one bucket per day', () => expect(trendBuckets(periodFor('monthly', '2026-10-05')).length).toBe(31))
+  it('monthly → one bucket per day, labelled with the month', () => {
+    const buckets = trendBuckets(periodFor('monthly', '2026-10-05'))
+    expect(buckets.length).toBe(31)
+    expect(buckets[0].label).toBe('Oct 1')
+  })
   it('quarterly → one bucket per month', () => expect(trendBuckets(periodFor('quarterly', '2026-10-05')).map((b) => b.label)).toEqual(['Oct', 'Nov', 'Dec']))
   it('yearly → twelve months', () => expect(trendBuckets(periodFor('yearly', '2026-10-05')).length).toBe(12))
   it('daily → the seven days ending on that day', () => {

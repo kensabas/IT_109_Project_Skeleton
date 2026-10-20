@@ -76,7 +76,7 @@ export function trendBuckets(period: Period): Bucket[] {
     const buckets: Bucket[] = []
     for (let day = start; day <= period.end; day = addDays(day, 1)) {
       const [, m, d] = parts(day)
-      buckets.push({ start: day, end: day, label: period.kind === 'daily' ? `${MONTH_SHORT[m]} ${d}` : String(d) })
+      buckets.push({ start: day, end: day, label: `${MONTH_SHORT[m]} ${d}` })
     }
     return buckets
   }
