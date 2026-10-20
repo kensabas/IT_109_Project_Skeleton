@@ -68,3 +68,14 @@ describe('signUp — starting account state and approval', () => {
     expect(store.currentUser?.approvalStatus).toBe('not-required')
   })
 })
+
+import { stateChangeOptions } from '../app/utils/labels'
+describe('stateChangeOptions — buttons offered for an account (Wave 4.3)', () => {
+  it('offers the two other states with action words', () => {
+    expect(stateChangeOptions('activated')).toEqual([
+      { state: 'deactivated', action: 'Deactivate' },
+      { state: 'suspended', action: 'Suspend' },
+    ])
+    expect(stateChangeOptions('suspended').map((o) => o.action)).toEqual(['Activate', 'Deactivate'])
+  })
+})
