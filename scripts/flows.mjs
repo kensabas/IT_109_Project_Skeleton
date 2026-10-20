@@ -250,3 +250,14 @@ await browser.close()
   console.log(JSON.stringify(['pending cleaner (F-03, F-02)', notice, disabled, why, gifMsg, pdfMsg, errs.length, errs.slice(0, 3)]))
   await b.close()
 }
+
+// Wave 7 — map fallback: with OpenStreetMap tiles blocked, the city list appears (plan D5).
+{
+  const b = await chromium.launch()
+  const c = await b.newContext(); const p = await c.newPage()
+  await p.route('**/tile.openstreetmap.org/**', (route) => route.abort())
+  await p.goto(B + '/login'); await p.fill('#login-email', 'rosa.garcia@example.com'); await p.fill('#login-password', 'CleanBest2024'); await p.click('button[type=submit]'); await p.waitForURL('**/cleaner/marketplace')
+  await p.goto(B + '/cleaner/location'); await p.waitForSelector('text=The map could not load', { timeout: 15000 })
+  console.log(JSON.stringify(['map fallback (tiles blocked)', (await p.textContent('.message--info'))?.trim(), await p.isVisible('#cleaner-pin'), await p.isDisabled('input[value=map]')]))
+  await b.close()
+}
