@@ -13,7 +13,10 @@
 // it is unconfirmed as a user-data field because PLAN_F-01.md's Phase 4.1
 // does not list it. Flagged in the Phase 4 run-status file.
 
-export type UserRole = 'client' | 'cleaner'
+// Wave 1.1 [F-04, F-06]: admins sign in on the same login screen
+// (plan D9, Q22 unconfirmed). There is no admin sign-up.
+export const USER_ROLES = ['client', 'cleaner', 'admin'] as const
+export type UserRole = (typeof USER_ROLES)[number]
 export type ClientType = 'homeowner' | 'company' | 'establishment' | 'business'
 
 // Wave 0.3 [F-05] — the three account states stated by the user.
@@ -36,6 +39,8 @@ export interface MockUser {
   clientType?: ClientType
   accountState: AccountState
   approvalStatus: ApprovalStatus
+  // Only the main admin can create admin accounts (F-04).
+  isMainAdmin?: boolean
 }
 
 // What a sign-up form provides; the store fills in the rest.
@@ -76,6 +81,28 @@ export function initialMockUsers(): MockUser[] {
       accountState: 'activated',
       approvalStatus: 'not-required',
       clientType: 'business',
+    },
+
+    // --- Admins (placeholders, Q22 unconfirmed) ---
+    {
+      name: 'Teresa Navarro',
+      email: 'admin.main@example.com',
+      mobileNumber: '09170000001',
+      password: 'AdminMain2026',
+      role: 'admin',
+      accountState: 'activated',
+      approvalStatus: 'not-required',
+      isMainAdmin: true,
+    },
+    {
+      name: 'Ramon Castillo',
+      email: 'admin.staff@example.com',
+      mobileNumber: '09170000002',
+      password: 'AdminStaff2026',
+      role: 'admin',
+      accountState: 'activated',
+      approvalStatus: 'not-required',
+      isMainAdmin: false,
     },
 
     // --- Cleaners ---

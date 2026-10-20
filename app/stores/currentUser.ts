@@ -38,6 +38,9 @@ const INVALID_CREDENTIALS_MESSAGE = 'Email or password is incorrect.'
 // the list. Phase 4.4.1.
 const DUPLICATE_EMAIL_MESSAGE = 'An account with this email already exists.'
 
+// F-04: admins have no registration; only the main admin creates them.
+const NO_ADMIN_SIGN_UP_MESSAGE = 'Admin accounts are created by the main admin in the admin panel.'
+
 export type AuthResult = { ok: true } | { ok: false; error: string }
 
 export const useCurrentUserStore = defineStore('currentUser', {
@@ -73,6 +76,9 @@ export const useCurrentUserStore = defineStore('currentUser', {
     // New accounts start activated; cleaners also start pending
     // approval (F-03: cannot apply before approval).
     signUp(input: NewUserInput): AuthResult {
+      if (input.role === 'admin') {
+        return { ok: false, error: NO_ADMIN_SIGN_UP_MESSAGE }
+      }
       const newUser: MockUser = {
         ...input,
         accountState: 'activated',
