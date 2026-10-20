@@ -96,8 +96,10 @@ function confirm() {
       empty-text="No requests to show."
     >
       <template #cell-title="{ row }">
-        <strong>{{ row.title }}</strong>
-        <p class="row-description">{{ row.description }}</p>
+        <div class="row-request">
+          <strong>{{ row.title }}</strong>
+          <p class="row-description">{{ row.description }}</p>
+        </div>
       </template>
       <template #cell-date="{ row }">{{ formatDateShort(row.date) }}<br /><span class="row-soft">{{ formatTime12h(row.startTime) }} to {{ formatTime12h(row.endTime) }}</span></template>
       <template #cell-area="{ row }">{{ row.barangay }}, {{ row.city }}</template>
@@ -119,6 +121,7 @@ function confirm() {
 </template>
 
 <style scoped>
+.row-request { min-width: 260px; }
 .row-description { margin: 4px 0 0; font-size: 13px; color: var(--color-text-soft); max-width: 320px; }
 .row-soft { font-size: 13px; color: var(--color-text-soft); }
 .row-link { display: block; margin-top: 4px; font-size: 13px; }
