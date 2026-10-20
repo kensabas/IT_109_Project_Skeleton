@@ -21,6 +21,7 @@ import { useJobsStore } from '~/stores/jobs'
 import type { MockUser } from '~/data/mockUsers'
 import { useCurrentUserStore } from '~/stores/currentUser'
 import { ACCOUNT_STATE_LABEL } from '~/utils/labels'
+import { ACCOUNT_STATE_TONE } from '~/utils/statusTones'
 import { JOB_STATUSES, type Job, type JobStatus } from '~/data/mockJobs'
 
 const route = useRoute()
@@ -216,8 +217,8 @@ function doArchive() {
                 <div class="cleaner__text">
                   <p class="cleaner__name">{{ cleanerFor(job)!.name }}</p>
                   <p class="cleaner__tags">
-                    <span class="pill">Cleaner</span>
-                    <span class="pill pill--state" :class="`pill--${cleanerFor(job)!.accountState}`">
+                    <span class="pill tone-chip--purple">Cleaner</span>
+                    <span class="pill" :class="`tone-chip--${ACCOUNT_STATE_TONE[cleanerFor(job)!.accountState]}`">
                       {{ ACCOUNT_STATE_LABEL[cleanerFor(job)!.accountState] }}
                     </span>
                   </p>
@@ -291,14 +292,14 @@ function doArchive() {
 .admin-shell__wordmark { font-size: 18px; font-weight: 800; color: var(--color-text); letter-spacing: -0.01em; }
 .admin-shell__tag {
   padding: 3px 10px; font-size: 11px; font-weight: 700;
-  color: var(--color-teal-dark); background-color: #D9F0EF;
-  border: 1px solid rgba(11, 102, 101, 0.14);
+  color: var(--color-teal-dark); background-color: var(--color-card);
+  border: 1px solid var(--color-card-border);
   border-radius: 999px; text-transform: uppercase; letter-spacing: 0.08em;
 }
 .admin-shell__who { margin: 0; font-size: 13px; color: var(--color-text-soft); }
 
 .detail-page {
-  max-width: 1120px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 24px;
   display: flex;
@@ -331,8 +332,8 @@ function doArchive() {
 
 /* Archive confirm card (in-page, NOT a native alert) */
 .confirm-card {
-  background-color: #FDF1D6;
-  color: #5C3F00;
+  background-color: var(--color-notice-bg);
+  color: var(--color-notice-text);
   border-radius: var(--radius-control);
   padding: 16px;
 }
@@ -427,7 +428,7 @@ function doArchive() {
 .cleaner { display: flex; gap: 14px; align-items: flex-start; }
 .cleaner__avatar {
   width: 48px; height: 48px; flex-shrink: 0;
-  border-radius: 50%; background-color: var(--color-teal); color: #FFFFFF;
+  border-radius: 50%; background-color: var(--color-tone-teal-bg); color: var(--color-tone-teal-fg);
   display: flex; align-items: center; justify-content: center;
   font-weight: 700; font-size: 16px; letter-spacing: 0.02em;
 }
@@ -441,12 +442,6 @@ function doArchive() {
 .pill {
   display: inline-flex; align-items: center; min-height: 22px; padding: 2px 10px;
   font-size: 11px; font-weight: 700; letter-spacing: 0.04em; border-radius: 999px;
-  background-color: #D9F0EF; color: var(--color-teal-dark);
-  box-shadow: inset 0 0 0 1px rgba(11, 102, 101, 0.18);
-}
-.pill--state {
-  background-color: #DDF1E3; color: #1E6B3A;
-  box-shadow: inset 0 0 0 1px rgba(30, 107, 58, 0.18);
 }
 
 /* Status card */
@@ -460,7 +455,7 @@ function doArchive() {
   font-size: 14px; color: var(--color-text-soft);
 }
 .status-list__row--current {
-  background-color: #D9F0EF; color: var(--color-teal-dark);
+  background-color: var(--color-tone-teal-bg); color: var(--color-tone-teal-fg);
   border-color: var(--color-teal);
 }
 .status-list__dot {

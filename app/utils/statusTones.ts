@@ -3,6 +3,7 @@
 // tested in tests/statusChip.contrast.spec.ts. Text labels are always
 // shown, so colour is never the only signal (WCAG 1.4.1).
 import type { JobStatus } from '../data/mockJobs'
+import type { AccountState } from '../data/mockUsers'
 
 export const TONES = ['blue', 'teal', 'green', 'red', 'amber', 'grey', 'purple'] as const
 export type Tone = (typeof TONES)[number]
@@ -12,4 +13,10 @@ export const JOB_STATUS_TONE: Record<JobStatus, Tone> = {
   'in-progress': 'teal',
   completed: 'green',
   missed: 'red',
+}
+
+export const ACCOUNT_STATE_TONE: Record<AccountState, Tone> = {
+  activated: 'green',
+  deactivated: 'grey',
+  suspended: 'red',
 }

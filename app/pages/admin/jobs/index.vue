@@ -217,8 +217,8 @@ const COLUMNS: { key: ColumnKey; label: string }[] = [
   font-size: 11px;
   font-weight: 700;
   color: var(--color-teal-dark);
-  background-color: #D9F0EF;
-  border: 1px solid rgba(11, 102, 101, 0.14);
+  background-color: var(--color-card);
+  border: 1px solid var(--color-card-border);
   border-radius: 999px;
   text-transform: uppercase;
   letter-spacing: 0.08em;

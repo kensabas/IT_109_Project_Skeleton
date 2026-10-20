@@ -6,7 +6,8 @@
 
 import { describe, it, expect } from 'vitest'
 import { contrastRatio } from '../app/utils/contrast'
-import { TONES, JOB_STATUS_TONE } from '../app/utils/statusTones'
+import { TONES, JOB_STATUS_TONE, ACCOUNT_STATE_TONE } from '../app/utils/statusTones'
+import { ACCOUNT_STATES } from '../app/data/mockUsers'
 import { JOB_STATUSES } from '../app/data/mockJobs'
 import { mainCssTokens, token } from './helpers/mainCss'
 
@@ -29,6 +30,14 @@ describe('StatusChip — every job status uses a defined tone', () => {
   for (const status of JOB_STATUSES) {
     it(status, () => {
       expect(TONES).toContain(JOB_STATUS_TONE[status])
+    })
+  }
+})
+
+describe('account state pill — every account state uses a defined tone (Wave 0.4)', () => {
+  for (const state of ACCOUNT_STATES) {
+    it(state, () => {
+      expect(TONES).toContain(ACCOUNT_STATE_TONE[state])
     })
   }
 })
